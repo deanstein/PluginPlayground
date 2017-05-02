@@ -1,0 +1,12 @@
+
+{
+
+    "PluginName": "Move All Scene Cameras",
+
+    "Scripts": [
+
+        "PLUGINLOCATION/MoveAllSceneCameras.js"
+
+    ]
+
+}

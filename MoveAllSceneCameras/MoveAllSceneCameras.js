@@ -78,9 +78,9 @@ for (i = 0; i < scenes.length; i++) {
 function Submit()
 {
     var args = {
-    "Move X": parseFloat(document.a.width.value),
-    "Move Y": parseFloat(document.a.length.value),
-    "Move Z": parseFloat(document.a.height.value)
+    "Move X": parseFloat(document.a.X.value),
+    "Move Y": parseFloat(document.a.Y.value),
+    "Move Z": parseFloat(document.a.Z.value)
     }
     console.log("CreateBlock");
     console.log("args");

@@ -1,12 +1,11 @@
 <html>
-<head><link rel="stylesheet" type="text/css" href="style.css"/>
+<head><link rel="stylesheet" type="text/css" href="stylesheet.css"/>
 <title>Move All Scene Cameras</title>
 <META NAME="Title" CONTENT="Move All Scene Cameras">
 <META NAME="Author" CONTENT="Josh Goldstein">
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <script type="text/javascript" src="MoveAllSceneCameras.js"></script>
 <script type="text/javascript">
-    <!--it/'s a good idea to initialize webchannel after DOM ready, if your code is going to manipulate the DOM-->
     document.addEventListener("DOMContentLoaded", function () {
         new QWebChannel(qt.webChannelTransport, function (channel) {
             window.FormItInterface = channel.objects.FormItInterface;

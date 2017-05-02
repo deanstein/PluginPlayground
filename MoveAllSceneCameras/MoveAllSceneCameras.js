@@ -8,9 +8,12 @@
 //deanstein.MoveCameras(20);
 
 deanstein = {};
-deanstein.MoveCameras = function(deltaX, deltaY, deltaZ)
+deanstein.MoveCameras = function(args)
 {
-
+	
+var deltaX = args.MoveX;
+var deltaY = args.MoveY;
+var deltaZ = args.MoveZ;
 console.clear();
 
 //Get all scenes
@@ -78,14 +81,14 @@ for (i = 0; i < scenes.length; i++) {
 function Submit()
 {
     var args = {
-    "Move X": parseFloat(document.a.X.value),
-    "Move Y": parseFloat(document.a.Y.value),
-    "Move Z": parseFloat(document.a.Z.value)
+    "MoveX": parseFloat(document.a.X.value),
+    "MoveY": parseFloat(document.a.Y.value),
+    "MoveZ": parseFloat(document.a.Z.value)
     }
-    console.log("CreateBlock");
+    console.log("deanstein.MoveCameras");
     console.log("args");
     // NOTE: window.FormItInterface.CallMethod will call the CreateBlock function
     // defined above with the given args.  This is needed to communicate
     // between the web JS enging process and the FormIt process.
-    window.FormItInterface.CallMethod("CreateBlock", JSON.stringify(args));
+    window.FormItInterface.CallMethod("deanstein.MoveCameras", JSON.stringify(args));
 }

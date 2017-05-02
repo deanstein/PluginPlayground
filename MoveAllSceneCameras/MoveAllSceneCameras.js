@@ -10,7 +10,7 @@
 deanstein = {};
 deanstein.MoveCameras = function(args)
 {
-	
+
 var deltaX = args.MoveX;
 var deltaY = args.MoveY;
 var deltaZ = args.MoveZ;
@@ -78,7 +78,7 @@ for (i = 0; i < scenes.length; i++) {
 
 // Submit runs from the HTML page.  This script gets loaded up in both FormIt's
 // JS engine and also in the embedded web JS engine inside the panel.
-function Submit()
+deanstein.Submit = function()
 {
     var args = {
     "MoveX": parseFloat(document.a.X.value),

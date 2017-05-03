@@ -4,8 +4,6 @@
 
 // To run:
 //FormIt.LoadPlugin("https://deanstein.github.io/PluginPlayground/MoveAllSceneCameras");
-//console.log("Test");
-//deanstein.MoveCameras(20);
 
 deanstein = {};
 deanstein.MoveCameras = function(args)

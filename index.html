@@ -15,7 +15,7 @@
         <div id="PluginCode">FormIt.LoadPlugin("https://deanstein.github.io/PluginPlayground/MoveAllSceneCameras");</div>
     </div>
 
-    <div id="PluginTitle">HIGH-FIDELITY ARC/CIRCLE (beta)</div>
+    <div id="PluginTitle">HIGH-FIDELITY ARC/CIRCLE (WIP)</div>
     <div id="PluginContainer">
         <div id="PluginDescription">Generates an arc or circle defined by radius, arc length, and facet edge length.
             <br><br>
@@ -55,7 +55,9 @@ var numberOfFacets = (arcLengthParameter / 0.25) * (accuracyORcount);
 // Report what was created
 console.log("Created an arc representing " + arcLengthParameterPercentage.toFixed(2) + "% of a circle with radius of " + radius + ", arc length of " + effectiveArcLength.toFixed(2) + ", and " + numberOfFacets + " facets inside History ID " + nHistoryID + ".");
 
-WSM.APICreateCircleOrArc(nHistoryID, radius, posCenter, xAxis, yAxis, dStartParam, dEndParam, accuracyORcount);</div>
+WSM.APICreateCircleOrArc(nHistoryID, radius, posCenter, xAxis, yAxis, dStartParam, dEndParam, accuracyORcount);
+        </div>
     </div>
-<footer></footer>
+<footer>
+</footer>
 </body>

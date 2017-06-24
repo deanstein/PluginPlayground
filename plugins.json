@@ -1,5 +1,7 @@
-
-[
+{
+  "RepoName": "Deanstein's Plugin Playground",
+  "Plugins": 
+  [
   "MoveAllSceneCameras"
-]
-
+  ]
+}

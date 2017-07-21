@@ -1,10 +1,10 @@
 <html>
 <head><link rel="stylesheet" type="text/css" href="stylesheet.css"/>
 <title>Move All Scene Cameras</title>
-<META NAME="Title" CONTENT="Move All Scene Cameras">
+<META NAME="Title" CONTENT="Arc/Circle Faceter">
 <META NAME="Author" CONTENT="Josh Goldstein">
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
-<script type="text/javascript" src="MoveAllSceneCameras.js"></script>
+<script type="text/javascript" src="ArcCircleFaceter.js"></script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function () {
         new QWebChannel(qt.webChannelTransport, function (channel) {
@@ -14,14 +14,15 @@
 </script>
 </head>
 <body>
-<h1>Move All Scene Cameras</h1>
+<h1>Arc/Circle Faceter</h1>
 <div id="form">
     <form name=a action="x.htm">
-        <input type=number name=X value = 0> Move X<br>
-        <input type=number name=Y value = 0> Move Y<br>
-        <input type=number name=Z value = 0> Move Z<br>
-    <input type=button value="Move Cameras" onClick="deanstein.Submit();">
-</form>
+        <input type=number name=Radius value=50> Radius<br>
+        <input type=text name=OriginPoint value = 0,0,0> Origin Point (X,Y,Z)<br>
+        <input type=number name=ArcLength value = 0.5> Arc Length (0-1, 1 = full circle)<br>  
+        <input type=number name=FacetEdgeLength value = 3> Apprx. Facet Edge Length<br>
+        <input type=button value="Create Arc/Circle" onClick="deanstein.Submit();">
+    </form>
 </div>
 </body>
 </html>

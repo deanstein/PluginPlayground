@@ -17,14 +17,14 @@ getCurrentSelectionObjectValue = function(numberOfObjectsSelected)
         {
         currentSelectionObjectValue = currentSelection[i]["ids"][0]["Object"];
         //return currentSelectionObjectValue;
-        console.log("Current selection #" + i + " index's objeect value: " + JSON.stringify(currentSelectionObjectValue));
+        console.log("Current selection object value for index #" + i + ": " + JSON.stringify(currentSelectionObjectValue));
 
         // get current EdgeIDs
         nEdgeID = currentSelectionObjectValue;
 
         // get edge points, start point first
         getPoints = WSM.APIGetEdgePointsReadOnly(nHistoryID, nEdgeID);
-        console.log("Reading these points from index #" + i + JSON.stringify(getPoints));
+        console.log("Reading these points from index #" + i + ": " +  JSON.stringify(getPoints));
         }
 }
 

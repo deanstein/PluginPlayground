@@ -22,10 +22,17 @@ getCurrentSelectionObjectValue = function(numberOfObjectsSelected)
         // get current EdgeIDs
         nEdgeID = currentSelectionObjectValue;
 
-        // get edge points, start point first
+        // get edge points
         getPoints = WSM.APIGetEdgePointsReadOnly(nHistoryID, nEdgeID);
         console.log("Reading these points from index #" + i + ": " +  JSON.stringify(getPoints));
+
+        // can't figure out how to get vertexID!
+        /*getVertexID = WSM.APIGetObjectAttributesReadOnly(nHistoryID, nEdgeID);
+        console.log("Reading these attributes from index #" + i + ": " +  JSON.stringify(getVertexID));*/
         }
+
+    // test two sets of points to determine if they are equal
+    //WSM.Utils.ObjectIDsAreEqual(id1, id2);
 }
 
 getCurrentSelectionObjectValue(numberOfObjectsSelected);

@@ -16,9 +16,16 @@ console.log("Vertex ID of current selection: " +  JSON.stringify(nVertexID));
 
 // define point0
 point0 = WSM.APIGetVertexPoint3dReadOnly(nHistoryID,nVertexID);
-console.log("Point 0 = " + JSON.stringify(nVertexID));
+console.log("Point 0 = " + JSON.stringify(point0));
 
-// get edges attached to this vertex
+pointX0 = point0["x"];
+console.log("Point X0 = " + JSON.stringify(pointX0));
+pointY0 = point0["y"];
+console.log("Point Y0 = " + JSON.stringify(pointY0));
+pointZ0 = point0["z"];
+console.log("Point Z0 = " + JSON.stringify(pointZ0));
+
+// get edges attached to point0
 nEdgeType = WSM.nEdgeType;
 getEdgeIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nVertexID,nEdgeType,true);
 console.log("Edge IDs attached to this vertex: " +  JSON.stringify(getEdgeIDs));

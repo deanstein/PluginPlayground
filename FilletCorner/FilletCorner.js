@@ -9,7 +9,10 @@ console.log("Current history: " + JSON.stringify(nHistoryID));
 currentSelection = FormIt.Selection.GetSelections();
 console.log("Current selection: " + JSON.stringify(currentSelection));
 
-if (currentSelection)
+// run toggle
+runAuto = false;
+
+if (runAuto)
 {
     // get vertexID of the selection
     nVertexType = WSM.nVertexType;

@@ -2,6 +2,8 @@
   "RepoName": "Deanstein's Plugin Playground",
   "Plugins": 
   [
-  "MoveAllSceneCameras"
+  "MoveAllSceneCameras",
+  "ArcCircleFaceter",
+  "FilletCorner"
   ]
 }

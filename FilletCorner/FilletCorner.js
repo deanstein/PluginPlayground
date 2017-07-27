@@ -27,16 +27,29 @@ console.log("Point Z0 = " + JSON.stringify(pointZ0));
 
 // get edges attached to point0
 nEdgeType = WSM.nEdgeType;
-getEdgeIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nVertexID,nEdgeType,true);
-console.log("Edge IDs attached to this vertex: " +  JSON.stringify(getEdgeIDs));
+edgeIDArray = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nVertexID,nEdgeType,true);
+console.log("Edge IDs attached to this vertex: " +  JSON.stringify(edgeIDArray));
+
+// TODO: throw an error if more than 2 are selected
+numberOfEdges = getEdgeIDs.length;
+console.log("Number of attached edges: " + numberOfEdges);
+
+// for each edge, get the vertex IDs
+for (i = 0; i <= numberOfEdges - 1; i++)
+    {
+    nType = WSM.nVertexType;
+    getVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,edgeIDArray[i],nType,false);
+    console.log("Reading these vertex IDs from edges: " + JSON.stringify(getVertexIDs));
+    edgeVertexArray = ["edge" + i]
+    edgeIDi = "edgeID" + i;
+    }
 
 
-/*// hard-coded for now. TODO: throw an error if more than 2 are selected
-numberOfObjectsSelected = 2;
+edgeIDArray.foreach(getVertexIDs);
 
 getCurrentSelectionObjectValue = function(numberOfObjectsSelected) 
 {
-    for (i = 0; i <= numberOfObjectsSelected - 1; i++) 
+    for (i = 0; i <= numberOfEdges - 1; i++) 
         {
         currentSelectionObjectValue = currentSelection[i]["ids"][0]["Object"];
         //return currentSelectionObjectValue;
@@ -61,6 +74,6 @@ getCurrentSelectionObjectValue = function(numberOfObjectsSelected)
     //WSM.Utils.ObjectIDsAreEqual(id1, id2);
 }
 
-getCurrentSelectionObjectValue(numberOfObjectsSelected);*/
+getCurrentSelectionObjectValue(numberOfObjectsSelected);
 
 FormIt.Selection.ClearSelections();

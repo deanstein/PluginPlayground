@@ -52,7 +52,7 @@ deanstein.Submit = function()
     "Radius": parseFloat(document.a.radius.value),
     "OriginPoint": parseFloat(document.a.posCenter.value),
     "ArcLength": parseFloat(document.a.arcLengthParameter.value),
-    "FacetEdgeLength": parseFLoat(document.activeElement.edgeLength.value);
+    "FacetEdgeLength": parseFLoat(document.activeElement.edgeLength.value)
     }
 
     console.log("deanstein.CreateArcCircle");

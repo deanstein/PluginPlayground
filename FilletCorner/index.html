@@ -1,0 +1,20 @@
+<html>
+<head><link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+<title>Fillet Corner</title>
+<META NAME="Title" CONTENT="Fillet Corner">
+<META NAME="Author" CONTENT="Josh Goldstein">
+<script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script type="text/javascript" src="ArcCircleFaceter.js"></script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        new QWebChannel(qt.webChannelTransport, function (channel) {
+            window.FormItInterface = channel.objects.FormItInterface;
+        });
+    });
+</script>
+</head>
+<body>
+<h1>Fillet Corner</h1>
+<p>This plugin is in progress.</p>
+</body>
+</html>

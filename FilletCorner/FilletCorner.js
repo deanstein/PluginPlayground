@@ -1,19 +1,19 @@
-console.clear();
-
-// get current history
-nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
-console.log("Current history: " + JSON.stringify(nHistoryID));
-
-
-// get current selection
-currentSelection = FormIt.Selection.GetSelections();
-console.log("Current selection: " + JSON.stringify(currentSelection));
-
 // run toggle
-runAuto = false;
+autoRun = false;
 
-if (runAuto)
+if (autoRun)
 {
+    console.clear();
+
+    // get current history
+    nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
+    console.log("Current history: " + JSON.stringify(nHistoryID));
+
+
+    // get current selection
+    currentSelection = FormIt.Selection.GetSelections();
+    console.log("Current selection: " + JSON.stringify(currentSelection));
+
     // get vertexID of the selection
     nVertexType = WSM.nVertexType;
     nVertexID = currentSelection[0]["ids"][0]["Object"];
@@ -35,21 +35,23 @@ if (runAuto)
     edgeIDArray = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nVertexID,nEdgeType,true);
     console.log("Edge IDs attached to this vertex: " +  JSON.stringify(edgeIDArray));
 
-    // TODO: throw an error if more than 2 are selected
-    numberOfEdges = getEdgeIDs.length;
+    // TODO: throw an error if more than 2 edges present at this vertex
+    numberOfEdges = edgeIDArray.length;
     console.log("Number of attached edges: " + numberOfEdges);
 
-    // for each edge, get the vertex IDs
+    // for each edge, store the vertex IDs as a variable
     for (i = 0; i <= numberOfEdges - 1; i++)
         {
         nType = WSM.nVertexType;
         getVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,edgeIDArray[i],nType,false);
-        console.log("Reading these vertex IDs from edges: " + JSON.stringify(getVertexIDs));
-        edgeVertexArray = ["edge" + i]
-        edgeIDi = "edgeID" + i;
+        console.log("Reading these vertex IDs from edge " + i + ": " + JSON.stringify(getVertexIDs));
+        
+        vertexID = [];
+        vertexID[i] = "vertexID" + i;
+        getVertexIDs[i] = vertexID[i];
+        console.log(vertexID[i] + " = " + getVertexIDs[i]);
         }
 
-    edgeIDArray.foreach(getVertexIDs);
 }
 
 /*

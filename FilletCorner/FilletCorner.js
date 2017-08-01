@@ -109,29 +109,29 @@ if (autoRun)
             y2Delta = pointY2 - pointY0;
             z2Delta = pointZ2 - pointZ0;
 
-            // identify d1 denominator
-            d1Denominator = Math.pow((Math.pow(x1Delta, 2) + Math.pow(y1Delta, 2) + Math.pow(z1Delta, 2)), 0.5);
-            console.log("d1Denominator = " + d1Denominator);
+            // calculate d1 length
+            d1Length = Math.pow((Math.pow(x1Delta, 2) + Math.pow(y1Delta, 2) + Math.pow(z1Delta, 2)), 0.5);
+            console.log("d1Length = " + d1Length);
 
             // calculate d1 vectors
-            d1x = x1Delta/d1Denominator;
+            d1x = x1Delta/d1Length;
             console.log("d1x = " + d1x);
-            d1y = y1Delta/d1Denominator;
+            d1y = y1Delta/d1Length;
             console.log("d1y = " + d1y);
-            d1z = z1Delta/d1Denominator;
+            d1z = z1Delta/d1Length;
             console.log("d1z = " + d1z);
             console.log("");
 
-            // identify d2 denominator
-            d2Denominator = Math.pow((Math.pow(x2Delta, 2) + Math.pow(y2Delta, 2) + Math.pow(z2Delta, 2)), 0.5);
-            console.log("d2Denominator = " + d2Denominator);
+            // calculate d2 length
+            d2Length = Math.pow((Math.pow(x2Delta, 2) + Math.pow(y2Delta, 2) + Math.pow(z2Delta, 2)), 0.5);
+            console.log("d2Length = " + d2Length);
 
             // calculate d2 vectors
-            d2x = x2Delta/d2Denominator;
+            d2x = x2Delta/d2Length;
             console.log("d2x = " + d2x);
-            d2y = y2Delta/d2Denominator;
+            d2y = y2Delta/d2Length;
             console.log("d2y = " + d2y);
-            d2z = z2Delta/d2Denominator;
+            d2z = z2Delta/d2Length;
             console.log("d2z = " + d2z);
             console.log("");
 
@@ -148,23 +148,65 @@ if (autoRun)
             // USER: set the desired radius
             radius = 10
 
-            // calculate distance needed from point0 for arc
+            // calculate distance needed from point0 for arc endpoimts
             travelDistance = radius/Math.tan(angleTheta/2);
             console.log("travelDistance = " + travelDistance);
 
            // define new point1
-            newPointX1 = pointX0 + (d1x * d1Denominator);
-            console.log(newPointX1);
-            newPointY1 = pointY0 + (d1y * d1Denominator);
-            console.log(newPointY1);
-            newPointZ1 = pointZ0 + (d1z * d1Denominator);
-            console.log(newPointZ1);
+            newPointX1 = pointX0 + (d1x * travelDistance);
+            newPointY1 = pointY0 + (d1y * travelDistance);
+            newPointZ1 = pointZ0 + (d1z * travelDistance);
+            console.log("newPoint1 (xyz) = " + newPointX1 + ", " + newPointY1 + ", " + newPointZ1);
 
             // create newPoint1
             newPoint1 = WSM.Geom.Point3d(newPointX1, newPointY1, newPointZ1);
 
-            // draw the line between the points for visualization
-            WSM.APIConnectPoint3ds(nHistoryID, point0, newPoint1);
+            // draw the line between the point0 and newPoint1 for visualization
+            //WSM.APIConnectPoint3ds(nHistoryID, point0, newPoint1);
+
+            // define new point2
+            newPointX2 = pointX0 + (d2x * travelDistance);
+            newPointY2 = pointY0 + (d2y * travelDistance);
+            newPointZ2 = pointZ0 + (d2z * travelDistance);
+            console.log("newPoint2 (xyz) = " + newPointX2 + ", " + newPointY2 + ", " + newPointZ2);
+
+            // create newPoint2
+            newPoint2 = WSM.Geom.Point3d(newPointX2, newPointY2, newPointZ2);
+
+            // draw the line between the point0 and newPoint2 for visualization
+            //WSM.APIConnectPoint3ds(nHistoryID, point0, newPoint2);
+
+            // calculate midpoint between newPoint1 and newPoint2
+            midPointX = ((newPointX1 + newPointX2)/2);
+            midPointY = ((newPointY1 + newPointY2)/2);
+            midPointZ = ((newPointZ1 + newPointZ2)/2);
+            console.log("midPoint (xyz) = " + midPointX + ", " + midPointY + ", " + midPointZ)
+
+            // identify delta values
+            midPointDeltaX = midPointX - pointX0;
+            midPointDeltaY = midPointY - pointY0;
+            midPointDeltaZ = midPointZ - pointZ0;
+
+            // calculate distance from midpoint to point0
+            midPointLength = Math.pow((Math.pow(midPointDeltaX, 2) + Math.pow(midPointDeltaY, 2) + Math.pow(midPointDeltaZ, 2)), 0.5);
+            console.log("midPointLength = " + midPointLength);
+
+            // calculate the distance from midPoint to centerPoint
+            midPointCenterPointDistance = radius * (Math.sin(angleTheta/2));
+            console.log("midPointCenterPointDistance = " + midPointCenterPointDistance);
+
+            // calculate the centerPoint
+            centerPointX = midPointX + (midPointCenterPointDistance - radius) * ((midPointX - pointX0)/midPointLength);
+            centerPointY = midPointY + (midPointCenterPointDistance - radius) * ((midPointY - pointY0)/midPointLength);
+            centerPointZ = midPointZ + (midPointCenterPointDistance - radius) * ((midPointZ - pointZ0)/midPointLength);
+            console.log("centerPoint (xyz) = " + centerPointX + ", " + centerPointY + ", " + centerPointZ)
+
+            // create centerPoint
+            centerPoint = WSM.Geom.Point3d(centerPointX,centerPointY,centerPointZ);
+            console.log("centerPoint: " + centerPoint);
+
+            // create new arc
+            WSM.APICreateCircleOrArcFromPoints(nHistoryID,newPoint1,newPoint2,centerPoint);
         }
     else 
         {

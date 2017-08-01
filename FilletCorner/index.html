@@ -4,7 +4,7 @@
 <META NAME="Title" CONTENT="Fillet Corner">
 <META NAME="Author" CONTENT="Josh Goldstein">
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
-<script type="text/javascript" src="ArcCircleFaceter.js"></script>
+<script type="text/javascript" src="FilletCorner.js"></script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function () {
         new QWebChannel(qt.webChannelTransport, function (channel) {
@@ -15,6 +15,11 @@
 </head>
 <body>
 <h1>Fillet Corner</h1>
-<p>This plugin is in progress.</p>
+<p>Select a vertex connecting 2 points to create an arc with the specified radius.</p>
+<form name=a action="x.htm">
+        <input type=number name=radius value=25 id=radius> Radius<br>
+        <input type=checkbox name=cleanup value=cleanup>Delete vertex?<br>
+        <input type=button value="Fillet Corner" onClick="deanstein.Submit();">
+</form>
 </body>
 </html>

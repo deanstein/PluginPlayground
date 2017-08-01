@@ -1,9 +1,12 @@
-// run toggle
-autoRun = false;
-
-if (autoRun)
+deanstein = {};
+deanstein.FilletCorner = function(args)
 {
+
+    radius = args.radius;
+    cleanup = args.cleanup;
+
     console.clear();
+    // this plugin only works on a simple corner, with 1 vertex and 2 attached edges
     requiredEdgeCount = 2;
 
     // get current history
@@ -14,6 +17,7 @@ if (autoRun)
     currentSelection = FormIt.Selection.GetSelections();
     console.log("Current selection: " + JSON.stringify(currentSelection));
 
+    // if you're not in the Main History, need to calculate the depth to extract the correct history data
     historyDepth = (currentSelection[0]["ids"].length) -1;
     console.log("Current selection length: " + historyDepth);
 
@@ -146,7 +150,7 @@ if (autoRun)
             console.log("angleThetaDegrees = " + angleThetaDegrees);
 
             // USER: set the desired radius
-            radius = 10
+            //radius = 10
 
             // calculate distance needed from point0 for arc endpoimts
             travelDistance = radius/Math.tan(angleTheta/2);
@@ -203,7 +207,6 @@ if (autoRun)
 
             // create centerPoint
             centerPoint = WSM.Geom.Point3d(centerPointX,centerPointY,centerPointZ);
-            console.log("centerPoint: " + centerPoint);
 
             // create new arc
             WSM.APICreateCircleOrArcFromPoints(nHistoryID,newPoint1,newPoint2,centerPoint);
@@ -212,4 +215,20 @@ if (autoRun)
         {
             console.log("Error: too few or too many edges attached at this vertex. Please select a vertex connecting only 2 edges.")
         }
+}
+
+// Submit runs from the HTML page.  This script gets loaded up in both FormIt's
+// JS engine and also in the embedded web JS engine inside the panel.
+deanstein.Submit = function()
+{
+    var args = {
+    "radius": parseFloat(document.a.radius.value)
+    //"cleanup": parseFloat(document.a.cleanup.value)
+    }
+    console.log("deanstein.FilletCorner");
+    console.log("args");
+    // NOTE: window.FormItInterface.CallMethod will call the MoveCameras function
+    // defined above with the given args.  This is needed to communicate
+    // between the web JS enging process and the FormIt process.
+    window.FormItInterface.CallMethod("deanstein.FilletCorner", JSON.stringify(args));
 }

@@ -40,7 +40,7 @@ input[type=button]:hover, input[type=submit]:hover {
     color: white;
     background-color: #4676a9;
     border: 2px solid #c3e8f4;
-    margin-top: 10px;
+    margin-top: 20px;
     padding: 6px;
 }
 
@@ -48,7 +48,7 @@ input[type=button]:focus, input[type=submit]:focus {
     color: white;
     background-color: #4676a9;
     border: 2px solid #c3e8f4;
-    margin-top: 10px;
+    margin-top: 20px;
     padding: 6px;
     outline: none;
 }

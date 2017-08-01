@@ -14,9 +14,12 @@ if (autoRun)
     currentSelection = FormIt.Selection.GetSelections();
     console.log("Current selection: " + JSON.stringify(currentSelection));
 
+    historyDepth = (currentSelection[0]["ids"].length) -1;
+    console.log("Current selection length: " + historyDepth);
+
     // get vertexID of the selection
     nVertexType = WSM.nVertexType;
-    nVertexID = currentSelection[0]["ids"][0]["Object"];
+    nVertexID = currentSelection[0]["ids"][historyDepth]["Object"];
     console.log("Vertex ID of current selection (point0): " +  JSON.stringify(nVertexID));
 
     // define the current selection as point0
@@ -32,14 +35,15 @@ if (autoRun)
     console.log("pointZ0 = " + JSON.stringify(pointZ0));
     console.log("");
 
-    // calculate how many edges are attached to point0
-    numberOfEdges = edgeIDArray.length;
-    console.log("Number of edges attached to point0: " + numberOfEdges);
-
     // get edge IDs attached to point0
     nEdgeType = WSM.nEdgeType;
     edgeIDArray = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nVertexID,nEdgeType,true);
     console.log("Edge IDs attached to point0: " +  JSON.stringify(edgeIDArray));
+
+    // calculate how many edges are attached to point0
+    numberOfEdges = edgeIDArray.length;
+    console.log("Number of edges attached to point0: " + numberOfEdges);
+    console.log("");
 
     // check if the number of edges attached to vertex is equal to the requirement
     if (numberOfEdges == requiredEdgeCount)
@@ -140,9 +144,30 @@ if (autoRun)
             console.log("angleTheta = " + angleTheta);
             angleThetaDegrees = angleTheta * (180/Math.PI);
             console.log("angleThetaDegrees = " + angleThetaDegrees);
+
+            // USER: set the desired radius
+            radius = 10
+
+            // calculate distance needed from point0 for arc
+            travelDistance = radius/Math.tan(angleTheta/2);
+            console.log("travelDistance = " + travelDistance);
+
+           // define new point1
+            newPointX1 = pointX0 + (d1x * d1Denominator);
+            console.log(newPointX1);
+            newPointY1 = pointY0 + (d1y * d1Denominator);
+            console.log(newPointY1);
+            newPointZ1 = pointZ0 + (d1z * d1Denominator);
+            console.log(newPointZ1);
+
+            // create newPoint1
+            newPoint1 = WSM.Geom.Point3d(newPointX1, newPointY1, newPointZ1);
+
+            // draw the line between the points for visualization
+            WSM.APIConnectPoint3ds(nHistoryID, point0, newPoint1);
         }
     else 
         {
-            console.log("Error, there are too few or too many edges attached at this vertex.")
+            console.log("Error: too few or too many edges attached at this vertex. Please select a vertex connecting only 2 edges.")
         }
 }

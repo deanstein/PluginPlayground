@@ -20,10 +20,12 @@ deanstein.FilletCorner = function(args)
     {
         // if you're not in the Main History, need to calculate the depth to extract the correct history data
         var historyDepth = (currentSelection[j]["ids"].length) -1;
-        console.log("Current selection length: " + historyDepth);
+        console.log("Current history depth: " + historyDepth);
 
-        // get vertexID of the selection
+        // get objectID of the current selection
         var nObjectID = currentSelection[j]["ids"][historyDepth]["Object"];
+
+        // get vertexIDs in the current selection
         var nVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nObjectID,WSM.nVertexType,false);
         for (var i = 0; i < nVertexIDs.length; i++)
         {

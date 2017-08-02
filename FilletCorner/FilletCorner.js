@@ -2,31 +2,44 @@ deanstein = {};
 deanstein.FilletCorner = function(args)
 {
 
-    radius = args.radius;
-    cleanup = args.cleanup;
+    var radius = args.radius;
+    var cleanup = args.cleanup;
 
     console.clear();
-    // this plugin only works on a simple corner, with 1 vertex and 2 attached edges
-    requiredEdgeCount = 2;
 
     // get current history
-    nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
+    var nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
     console.log("Current history: " + JSON.stringify(nHistoryID));
 
-    // get current selection (TODO: throw an error if not a point)
-    currentSelection = FormIt.Selection.GetSelections();
+    // get current selection
+    var currentSelection = FormIt.Selection.GetSelections();
     console.log("Current selection: " + JSON.stringify(currentSelection));
 
-    // if you're not in the Main History, need to calculate the depth to extract the correct history data
-    historyDepth = (currentSelection[0]["ids"].length) -1;
-    console.log("Current selection length: " + historyDepth);
+    // for each object selected, get the vertexIDs
+    for (var j = 0; j < currentSelection.length; j++)
+    {
+        // if you're not in the Main History, need to calculate the depth to extract the correct history data
+        var historyDepth = (currentSelection[j]["ids"].length) -1;
+        console.log("Current selection length: " + historyDepth);
 
-    // get vertexID of the selection
-    nVertexType = WSM.nVertexType;
-    nVertexID = currentSelection[0]["ids"][historyDepth]["Object"];
-    console.log("Vertex ID of current selection (point0): " +  JSON.stringify(nVertexID));
+        // get vertexID of the selection
+        var nObjectID = currentSelection[j]["ids"][historyDepth]["Object"];
+        var nVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nObjectID,WSM.nVertexType,false);
+        for (var i = 0; i < nVertexIDs.length; i++)
+        {
+            var nVertexID = nVertexIDs[i];
+            console.log("Vertex ID of current selection (point0): " +  JSON.stringify(nVertexID));
+            blendVertex(nHistoryID,nVertexID,radius,cleanup);
+        }
+    }
+}
 
-    // define the current selection as point0
+function blendVertex(nHistoryID,nVertexID,radius,cleanup) 
+{
+    // fillet will only work on vertices with 2 attached edges
+    requiredEdgeCount = 2;
+
+    // define the current vertex as point0
     console.log("---------- define point0 ----------")
     point0 = WSM.APIGetVertexPoint3dReadOnly(nHistoryID,nVertexID);
     console.log("point0 = " + JSON.stringify(point0));
@@ -55,7 +68,7 @@ deanstein.FilletCorner = function(args)
             remainingVertexIds = [];
 
             // for each edge, get the vertex IDs
-            for (i = 0; i <= numberOfEdges - 1; i++)
+            for (var i = 0; i <= numberOfEdges - 1; i++)
                 {
                     nType = WSM.nVertexType;
                     // for each edge, returns an array of vertices
@@ -212,7 +225,7 @@ deanstein.FilletCorner = function(args)
             WSM.APICreateCircleOrArcFromPoints(nHistoryID,newPoint1,newPoint2,centerPoint);
 
             // delete the vertex if the option is checked
-            if (cleanup.checked == true) 
+            if (cleanup) 
             {
                 WSM.APIDeleteObject(nHistoryID,nVertexID);
             }
@@ -229,7 +242,7 @@ deanstein.Submit = function()
 {
     var args = {
     "radius": parseFloat(document.a.radius.value),
-    "cleanup": (document.a.cleanup)
+    "cleanup": document.a.cleanup.checked
     }
     console.log("deanstein.FilletCorner");
     console.log("args");

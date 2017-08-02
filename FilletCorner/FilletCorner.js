@@ -210,6 +210,12 @@ deanstein.FilletCorner = function(args)
 
             // create new arc
             WSM.APICreateCircleOrArcFromPoints(nHistoryID,newPoint1,newPoint2,centerPoint);
+
+            // delete the vertex if the option is checked
+            if (cleanup.checked == true) 
+            {
+                WSM.APIDeleteObject(nHistoryID,nVertexID);
+            }
         }
     else 
         {
@@ -222,8 +228,8 @@ deanstein.FilletCorner = function(args)
 deanstein.Submit = function()
 {
     var args = {
-    "radius": parseFloat(document.a.radius.value)
-    //"cleanup": parseFloat(document.a.cleanup.value)
+    "radius": parseFloat(document.a.radius.value),
+    "cleanup": (document.a.cleanup)
     }
     console.log("deanstein.FilletCorner");
     console.log("args");

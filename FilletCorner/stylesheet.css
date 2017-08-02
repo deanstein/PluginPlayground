@@ -27,7 +27,11 @@ input:hover {
 }
 
 input[type=checkbox] {
-    text-align: left;
+    /*display: inline;*/
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 55px;
 }
 
 input[type=button], input[type=submit] {

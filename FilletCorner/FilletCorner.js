@@ -15,7 +15,7 @@ deanstein.FilletCorner = function(args)
     var currentSelection = FormIt.Selection.GetSelections();
     console.log("Current selection: " + JSON.stringify(currentSelection));
 
-    FormIt.UndoManagement.BeginState();
+    //FormIt.UndoManagement.BeginState();
     // for each object selected, get the vertexIDs
     for (var j = 0; j < currentSelection.length; j++)
     {
@@ -35,7 +35,7 @@ deanstein.FilletCorner = function(args)
             blendVertex(nHistoryID,nVertexID,radius,cleanup);
         }
     }
-    FormIt.UndoManagement.EndState("Fillet Corner Plugin");
+    //FormIt.UndoManagement.EndState("Fillet Corner Plugin");
 }
 
 function blendVertex(nHistoryID,nVertexID,radius,cleanup) 

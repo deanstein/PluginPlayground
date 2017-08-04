@@ -15,7 +15,7 @@ deanstein.FilletCorner = function(args)
     var currentSelection = FormIt.Selection.GetSelections();
     console.log("Current selection: " + JSON.stringify(currentSelection));
 
-    //FormIt.UndoManagement.BeginState();
+    FormIt.UndoManagement.BeginState();
     // for each object selected, get the vertexIDs
     for (var j = 0; j < currentSelection.length; j++)
     {
@@ -32,10 +32,10 @@ deanstein.FilletCorner = function(args)
         {
             var nVertexID = nVertexIDs[i];
             console.log("Vertex ID of current selection (point0): " +  JSON.stringify(nVertexID));
-            blendVertex(nHistoryID,nVertexID,radius,cleanup);
+            blendVertex(nHistoryID, nVertexID, radius, cleanup);
         }
     }
-    //FormIt.UndoManagement.EndState("Fillet Corner Plugin");
+    FormIt.UndoManagement.EndState("Fillet Corner Plugin");
 }
 
 function blendVertex(nHistoryID,nVertexID,radius,cleanup) 
@@ -226,16 +226,20 @@ function blendVertex(nHistoryID,nVertexID,radius,cleanup)
 
             // create new arc
             WSM.APICreateCircleOrArcFromPoints(nHistoryID,newPoint1,newPoint2,centerPoint);
+            console.log("");
+            console.log("Successfully created a new arc with radius " + radius);
 
             // delete the vertex if the option is checked
             if (cleanup) 
             {
                 WSM.APIDeleteObject(nHistoryID,nVertexID);
+                console.log("Deleted vertexID " + nVertexID);
+                console.log("");
             }
         }
     else 
         {
-            console.log("Error: too few or too many edges attached at this vertex. Please select a vertex connecting only 2 edges.")
+            console.log("Error: too few or too many edges attached at this vertex. Select an object with a vertex connecting only 2 edges.")
         }
 }
 
@@ -247,6 +251,15 @@ deanstein.Submit = function()
     "radius": parseFloat(document.a.radius.value),
     "cleanup": document.a.cleanup.checked
     }
+
+document.a.radius.onkeydown = function(event)
+    {
+        if (event.keyCode == 13)
+        {
+            deanstein.Submit();
+        }
+    }
+
     console.log("deanstein.FilletCorner");
     console.log("args");
     // NOTE: window.FormItInterface.CallMethod will call the MoveCameras function

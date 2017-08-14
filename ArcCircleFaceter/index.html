@@ -3,14 +3,10 @@
 <title>Arc/Circle Faceter</title>
 <META NAME="Title" CONTENT="Arc/Circle Faceter">
 <META NAME="Author" CONTENT="Josh Goldstein">
-<script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script type="text/javascript" src="https://formit3d.github.io/FormItExamplePlugins/SharedPluginFiles/FormItInterface.js"></script>
 <script type="text/javascript" src="ArcCircleFaceter.js"></script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-        new QWebChannel(qt.webChannelTransport, function (channel) {
-            window.FormItInterface = channel.objects.FormItInterface;
-        });
-    });
+    FormItInterface.AddEventListener("DOMContentLoaded");
 </script>
 </head>
 <body>

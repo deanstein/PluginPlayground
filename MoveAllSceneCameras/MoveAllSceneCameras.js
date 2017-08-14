@@ -91,5 +91,5 @@ deanstein.Submit = function()
     // NOTE: window.FormItInterface.CallMethod will call the MoveCameras function
     // defined above with the given args.  This is needed to communicate
     // between the web JS enging process and the FormIt process.
-    window.FormItInterface.CallMethod("deanstein.MoveCameras", JSON.stringify(args));
+    window.FormItInterface.CallMethod("deanstein.MoveCameras", args);
 }

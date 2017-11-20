@@ -1,0 +1,8 @@
+{
+    "PluginName": "Statistics",
+    "PluginDescription": "Calculates various metrics given a FormIt canvas selection.",
+    "Scripts": [
+        "PLUGINLOCATION/Statistics.js"
+    ]
+    ,"Panel": "PLUGINLOCATION/index.html"
+}

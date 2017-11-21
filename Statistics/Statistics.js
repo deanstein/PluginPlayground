@@ -7,13 +7,13 @@ deanstein.Statistics = function(args)
 
     console.clear();
 
-    // get current selection
-    var currentSelection = FormIt.Selection.GetSelections();
-    console.log("Current selection: " + JSON.stringify(currentSelection));
-
     // get current history
     var nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
     console.log("Current history: " + JSON.stringify(nHistoryID));
+
+    // get current selection
+    var currentSelection = FormIt.Selection.GetSelections();
+    console.log("Current selection: " + JSON.stringify(currentSelection));
 
     function calculateVolume(currentSelection) 
     {

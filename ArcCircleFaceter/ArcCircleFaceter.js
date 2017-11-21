@@ -1,4 +1,55 @@
 deanstein = {};
+
+deanstein.RebuildArcCircle = function(args)
+{
+
+    console.clear();
+
+    // get current history
+    var nHistoryID = FormIt.GroupEdit.GetEditingHistoryID();
+    console.log("Current history: " + JSON.stringify(nHistoryID));
+
+    // get current selection
+    var currentSelection = FormIt.Selection.GetSelections();
+    console.log("Current selection: " + JSON.stringify(currentSelection));
+    
+    // create a new array to store the vertices in
+    var vertexArray = new Array();
+
+    FormIt.UndoManagement.BeginState();
+    // for each object selected, get the vertexIDs
+    for (var j = 0; j < currentSelection.length; j++)
+    {
+        // if you're not in the Main History, need to calculate the depth to extract the correct history data
+        var historyDepth = (currentSelection[j]["ids"].length) - 1;
+
+        // get objectID of the current selection
+        var nObjectID = currentSelection[j]["ids"][historyDepth]["Object"];
+
+        // get the owner of the selection
+        var selectionOwner = WSM.APIGetTopLevelOwnersReadOnly(nHistoryID,nObjectID);
+        console.log("Selection owner: " + JSON.stringify(selectionOwner[0]));
+
+        // // get the attributes of the selection
+        // var selectionAttributes = WSM.APIGetObjectAttributesReadOnly(nHistoryID, selectionOwner[0]);
+        // console.log("Selection attributes: " + JSON.stringify(selectionAttributes));
+
+        // get vertexIDs in the current selection
+        var nVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nObjectID,WSM.nVertexType,false);
+        for (var i = 0; i < nVertexIDs.length; i++)
+        {
+            var nVertexID = nVertexIDs[i];
+            vertexArray.push(nVertexID);
+        }
+
+    }
+
+    console.log("Vertex array: " +  JSON.stringify(vertexArray));
+
+    FormIt.UndoManagement.EndState("Rebuild Curve");
+
+}
+
 deanstein.CreateArcCircle = function(args)
 {
     var radius = args.radius;
@@ -61,10 +112,10 @@ deanstein.Submit = function()
     "edgeLength": parseFloat(document.a.edgeLength.value)
     }
 
-    console.log("deanstein.CreateArcCircle");
+    console.log("deanstein.RebuildArcCircle");
     console.log("args");
     // NOTE: window.FormItInterface.CallMethod will call the function
     // defined above with the given args.  This is needed to communicate
     // between the web JS enging process and the FormIt process.
-    window.FormItInterface.CallMethod("deanstein.CreateArcCircle", args);
+    window.FormItInterface.CallMethod("deanstein.RebuildArcCircle", args);
 }

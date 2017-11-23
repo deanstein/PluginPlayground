@@ -11,44 +11,248 @@ deanstein.RebuildArcCircle = function(args)
 
     // get current selection
     var currentSelection = FormIt.Selection.GetSelections();
-    console.log("Current selection: " + JSON.stringify(currentSelection));
-    
-    // create a new array to store the vertices in
-    var vertexArray = new Array();
+    //console.log("Current selection: " + JSON.stringify(currentSelection));
 
-    FormIt.UndoManagement.BeginState();
-    // for each object selected, get the vertexIDs
-    for (var j = 0; j < currentSelection.length; j++)
+    // report how many items in the selection
+    var currentSelectionLength = currentSelection.length;
+    console.log("Number of objects in selection: " + currentSelectionLength);
+
+    var arcCircleAnalysisArray = new Array();
+    var typeArray = new Array();
+    var bIsEdgeTypeArray = new Array();
+    var siblingArray = new Array();
+    var bIsSameSiblingArray = new Array();
+    var bIsOnCircleArray = new Array();
+    var bIsOnSplineArray = new Array();
+
+    function getSelectionInfo()
     {
-        // if you're not in the Main History, need to calculate the depth to extract the correct history data
-        var historyDepth = (currentSelection[j]["ids"].length) - 1;
-
-        // get objectID of the current selection
-        var nObjectID = currentSelection[j]["ids"][historyDepth]["Object"];
-
-        // get the owner of the selection
-        var selectionOwner = WSM.APIGetTopLevelOwnersReadOnly(nHistoryID,nObjectID);
-        console.log("Selection owner: " + JSON.stringify(selectionOwner[0]));
-
-        // // get the attributes of the selection
-        // var selectionAttributes = WSM.APIGetObjectAttributesReadOnly(nHistoryID, selectionOwner[0]);
-        // console.log("Selection attributes: " + JSON.stringify(selectionAttributes));
-
-        // get vertexIDs in the current selection
-        var nVertexIDs = WSM.APIGetObjectsByTypeReadOnly(nHistoryID,nObjectID,WSM.nVertexType,false);
-        for (var i = 0; i < nVertexIDs.length; i++)
+        // for each edge in the selection, get helpful information
+        for (var j = 0; j < currentSelection.length; j++)
         {
-            var nVertexID = nVertexIDs[i];
-            vertexArray.push(nVertexID);
-        }
+            // if you're not in the Main History, need to calculate the depth to extract the correct history data
+            var historyDepth = (currentSelection[j]["ids"].length) - 1;
 
+            // get objectID of the current selection
+            var nObjectID = currentSelection[j]["ids"][historyDepth]["Object"];
+            //console.log("Selection ID: " + nObjectID);
+
+            // get object type of the current selection, then push the results into an array
+            var nType =  WSM.APIGetObjectTypeReadOnly(nHistoryID, nObjectID);
+            //console.log("Object type: " + nType);
+            typeArray.push(nType);
+            //console.log("Object type array: " + typeArray);
+
+            function getArcCircleAnalysis() 
+            {
+                // test selection for arc/circle attributes, then push the results into array
+                var arcCircleAnalysis = WSM.APIIsEdgeOnCircleReadOnly(nHistoryID, nObjectID);
+                //console.log("Report results of arc/circle analysis: " + JSON.stringify(arcCircleAnalysis));
+                var bIsOnCircle = arcCircleAnalysis["bHasCircleAttribute"];
+                //console.log("Is selection part of a circle? " + arcCircleAnalysis["bHasCircleAttribute"]);
+                bIsOnCircleArray.push(bIsOnCircle);
+                //console.log(JSON.stringify(arcCircleAnalysis));
+                arcCircleAnalysisArray.push(arcCircleAnalysis);
+                return arcCircleAnalysis;
+            }
+
+            var arcCircleAnalysis = getArcCircleAnalysis();
+
+            function getSplineAnalysis()
+            {
+                // test selection for spline attributes, then push the results into an array
+                var splineAnalysis = WSM.APIIsEdgeOnSplineReadOnly(nHistoryID, nObjectID);
+                var bIsOnSpline = splineAnalysis["bHasSplineAttribute"];
+                bIsOnSplineArray.push(bIsOnSpline);
+            }
+
+            var splineAnalysis = getSplineAnalysis();
+
+            // determine which siblings the current edge has, then push the results into an array
+            var currentSiblings = "[" + arcCircleAnalysis["aAllCircleSiblings"] + "]";
+            //console.log("Current sibling IDs: " + currentSiblings);
+            siblingArray.push(currentSiblings);
+
+        }
     }
 
-    console.log("Vertex array: " +  JSON.stringify(vertexArray));
+    getSelectionInfo();
+
+    // define generic function to test each item in the array, compare for equality, and return a new array containing boolean values
+    function testForIdentical(array, bArray, message) 
+    {
+        for (var k = 0; k < array.length - 1; k++)
+        {
+            if (array[k] === array[k+1])
+            {
+                bArray.push(true);
+            }
+            if (array[k] != array[k+1])
+            {
+                bArray.push(false);
+            }
+        }
+        //console.log(message + bArray);
+    }
+
+    // define generic function that returns true only if all booleans evaluated are true
+    function booleanReduce(array)
+    {
+        function isTrue(bool) 
+        {
+            if (bool === true) 
+            {
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        }
+        
+        if (array.every(isTrue))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+
+    // run pre-checks to determine whether we can proceed with the given selection set
+    function preCheck() 
+    {
+        console.log("\nStart selection precheck... \n");
+
+        // creates an array of boolean values depending on whether the selection contains edges
+        function defineValidType()
+        {
+            // the valid edge type is defined as the number 7
+            var validType = 7;
+            for (var m = 0; m < typeArray.length; m++)
+            {
+                if (typeArray[m] === validType)
+                {
+                    bIsEdgeTypeArray.push(true);
+                }
+                else 
+                {
+                    bIsEdgeTypeArray.push(false);
+                }
+            }
+            //console.log("Is valid array: " + bIsEdgeTypeArray);
+        }
+
+        defineValidType();
+
+        // TEST if selection contains only edges
+        var bIsSelectionEdgeTypeOnly = booleanReduce(bIsEdgeTypeArray);
+        console.log("TEST: Is selection set edges only? " + bIsSelectionEdgeTypeOnly);
+
+        if (bIsSelectionEdgeTypeOnly === false)
+        {
+            console.log("Can't continue: The selection set contains a mix of objects or incompatible objects. Try selecting only a single curve or line.");
+        }
+
+        // run the test for contiguity
+        testForIdentical(siblingArray, bIsSameSiblingArray, "Is same sibling results: ");
+
+        // TEST if the selected edges are contiguous
+        var bIsSelectionContiguous = booleanReduce(bIsSameSiblingArray);
+        console.log("TEST: Is selection set contiguous? " + bIsSelectionContiguous);
+
+        
+        if (bIsSelectionContiguous === false)
+        {
+            console.log("Can't continue: The selection set contains multiple edges. Try selecting only a single curve or line.");
+        }
+
+        if (bIsSelectionEdgeTypeOnly && bIsSelectionContiguous) 
+        {
+            var preCheckPassed = true;
+            console.log("\nPrecheck passed! \n");
+        }
+        else
+        {
+            var preCheckPassed = false;
+            console.log("\nPrecheck failed. \n");
+        }
+
+        return preCheckPassed;
+        console.log(preCheckPassed);
+    }
+
+    // run the precheck to define the precheck variable
+    var preCheckPassed = preCheck();
+
+    // returns the type of operation to proceed with
+    function operationType(preCheckPassed) 
+    {
+        // TEST if the entire selection has the circle attribute
+        var bIsArcCircleType = booleanReduce(bIsOnCircleArray);
+
+        // TEST if the entire selection has the spline attribute
+        var bIsSplineType = booleanReduce(bIsOnSplineArray);
+
+        if (bIsArcCircleType === true)
+        {
+            var operationType = "arcCircle";
+        }
+
+        else if (bIsSplineType === true)
+        {
+            var operationType = "spline";
+        }
+
+        else
+        {
+            var operationType = "line";
+        }
+
+        console.log("Operation type: " + operationType);
+        return operationType;
+    }
+
+    if (preCheckPassed === true)
+    {
+        var operationType = operationType();
+    }
+
+    function rebuildCurve(operationType)
+    {
+        if (operationType === "arcCircle")
+        {
+            console.log("\nBegin rebuild of arc or circle...\n");
+
+            var arcCircleAnalysis = arcCircleAnalysisArray[0];
+            var center = arcCircleAnalysis["center"];
+            console.log("Center of circle: " + JSON.stringify(center));
+
+            var xAxis = arcCircleAnalysis["x-axis"];
+            console.log("X axis: " + JSON.stringify(xAxis));
+
+        }
+        else if (operationType === "spline")
+        {
+            console.log("\n Rebuilding splines is not yet supported.");
+        }
+        else if (operationType === "line")
+        {
+            console.log("\n Rebuilding lines is not yet supported");
+        }
+    }
+
+    FormIt.UndoManagement.BeginState();
+
+    // execute the rebuild
+    rebuildCurve(operationType);
 
     FormIt.UndoManagement.EndState("Rebuild Curve");
 
 }
+
+
 
 deanstein.CreateArcCircle = function(args)
 {

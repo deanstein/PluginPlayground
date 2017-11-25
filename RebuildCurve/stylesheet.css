@@ -26,6 +26,14 @@ input:hover {
     outline: none;
 }
 
+input[type=checkbox] {
+    /*display: inline;*/
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 55px;
+}
+
 input[type=button], input[type=submit] {
     color: white;
     background-color: #4676a9;
@@ -56,4 +64,9 @@ input[type=button]:focus, input[type=submit]:focus {
 form {
     font-family: Arial;
     margin-left: 0px;
+}
+
+p {
+    font-family: Arial;
+    font-size: 14px;
 }

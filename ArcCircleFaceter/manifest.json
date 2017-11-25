@@ -1,8 +1,0 @@
-{
-    "PluginName": "Arc/Circle Faceter (WIP)",
-    "PluginDescription": "Launches a panel that creates circles and arcs, with options to specify faceting counts.",
-    "Scripts": [
-        "PLUGINLOCATION/ArcCircleFaceter.js"
-    ]
-    ,"Panel": "PLUGINLOCATION/index.html"
-}

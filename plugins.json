@@ -2,7 +2,8 @@
   "RepoName": "Josh's Plugin Playground",
   "Plugins": 
   [
-  "MoveAllSceneCameras",
-  "FilletCorner"
+  "RebuildCurve",
+  "FilletCorner",
+  "MoveAllSceneCameras"
   ]
 }

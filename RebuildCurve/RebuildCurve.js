@@ -290,99 +290,59 @@ deanstein.RebuildCurve = function(args)
                 }
                 //console.log("Array of unique vertex IDs: " + nVertexIDUniqueArray);
 
-
-                // get the ID of the first vertex of the first edge in the arraay
-                var arcStartPosID = nVertexIDUniqueArray[0];
-                console.log("Start point vertexID: " + arcStartPosID);
-
-                // get the point3D equivalent
-                var arcStartPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcStartPosID);
-                console.log("Start point point3D: " + JSON.stringify(arcStartPos));
-
-                // get the ID of the last vertex of the last edge in the array
-                var arcEndPosID = nVertexIDUniqueArray[1];
-                console.log("End point vertexID: " + arcEndPosID);
-
-                // get the point3D equivalent
-                var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
-                console.log("End point point 3D: " + JSON.stringify(arcEndPos));
-
-                function getMidPointAtFacetedCurve()
+                // if no unique values are found, this is a circle, so mark the circle boolean true and redefine the two end points so all three points are distinct
+                if (nVertexIDUniqueArray.length === 0)
                 {
-                    // check if the current edge count is odd or even, then get the midpoint
-                    // if the edge count is even, simply take the point that naturally sits at the midpoint of the faceted arc
-                    if ((edgeCount % 2) === 0)
-                    {
-                        console.log("\nGetting midpoint based on even segment count...\n");
-                        var midPointEdgeIndex = edgeCount / 2 - 1;
-                        var midPointID = nVertexIDArray[midPointEdgeIndex][1];
-                        var midPointAtFacetedCurve = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, midPointID);
-                        console.log("Midpoint based on even segment count: " + JSON.stringify(midPointAtFacetedCurve));
-                    }
-                    // or if the edge count is odd, calculate the midpoint of the middle segment
-                    else
-                    {
-                        console.log("\nGetting midpoint based on odd segment count...\n");
-                        var midPointEdgeIndex = Math.ceil(edgeCount / 2 - 1);
-                        console.log("midPointEdgeIndex: " + midPointEdgeIndex);
+                    var bCircle = true;
+                    // get the ID of the second vertex of the first edge in the array
+                    var arcStartPosID = nVertexIDArrayFlattened[2];
+                    console.log("Start point vertexID: " + arcStartPosID);
 
-                        // get the first point on the midpoint edge
-                        var midPointEdgePoint0ID = nVertexIDArray[midPointEdgeIndex][0];
-                        var midPointEdgePoint0 = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, midPointEdgePoint0ID);
-                        var midPointEdgePoint0x = midPointEdgePoint0["x"];
-                        var midPointEdgePoint0y = midPointEdgePoint0["y"];
-                        var midPointEdgePoint0z = midPointEdgePoint0["z"];
+                    // get the point3D equivalent
+                    var arcStartPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcStartPosID);
+                    console.log("Start point point3D: " + JSON.stringify(arcStartPos))
 
-                        // get the last point on the midpoint edge
-                        var midPointEdgePoint1ID = nVertexIDArray[midPointEdgeIndex][1];
-                        var midPointEdgePoint1 = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, midPointEdgePoint1ID);
-                        var midPointEdgePoint1x = midPointEdgePoint1["x"];
-                        var midPointEdgePoint1y = midPointEdgePoint1["y"];
-                        var midPointEdgePoint1z = midPointEdgePoint1["z"];
-                        //console.log("Got an x value?" + midPointEdgePoint1x);
+                    // get the ID of the last vertex of the last edge in the array
+                    var arcEndPosID = nVertexIDArrayFlattened[nVertexIDArrayFlattened.length - 1];
+                    console.log("End point vertexID: " + arcEndPosID);
 
-                        // generic function to get the midpoint between two points defined by an array [x,y,z]
-                        function getMidPointBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
-                        {
-                            var x = (x0 + x1) / 2;
-                            var y = (y0 + y1) / 2;
-                            var z = (z0 + z1) / 2;
+                    // get the point3D equivalent
+                    var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
+                    console.log("End point point 3D: " + JSON.stringify(arcEndPos));
+                }
+                else
+                {
+                    var bCircle = false;
+                    // get the ID of the first vertex of the first edge in the array
+                    var arcStartPosID = nVertexIDUniqueArray[0];
+                    console.log("Start point vertexID: " + arcStartPosID);
 
-                            var midPoint = new Array(x, y, z);
-                            // returns [x,y,z]
-                            return midPoint;
-                            console.log(midPoint);
-                        }
+                    // get the point3D equivalent
+                    var arcStartPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcStartPosID);
+                    console.log("Start point point3D: " + JSON.stringify(arcStartPos));
 
-                        var midPoint = getMidPointBetweenTwoPoints(midPointEdgePoint0x, midPointEdgePoint0y, midPointEdgePoint0z, midPointEdgePoint1x, midPointEdgePoint1y, midPointEdgePoint1z);
-                        var midPointAtFacetedCurve =  WSM.Geom.Point3d(midPoint[0], midPoint[1], midPoint[2]);
-                        
-                        // optionally draw a debug vertex that will appear when the midpoint is not coincident with the new curve
-                        var drawDebugPoint = false;
-                        if (drawDebugPoint === true)
-                        {
-                            WSM.APICreateVertex(nHistoryID, midPointAtFacetedCurve);
+                    // get the ID of the last vertex of the last edge in the array
+                    var arcEndPosID = nVertexIDUniqueArray[1];
+                    console.log("End point vertexID: " + arcEndPosID);
 
-                        }
-                        console.log("Midpoint based on odd segment count: " + JSON.stringify(midPointAtFacetedCurve));
-
-                    }
-                    return midPointAtFacetedCurve;
-                    console.log("Midpoint at faceted curve: " + JSON.stringify(midPointAtFacetedCurve));
+                    // get the point3D equivalent
+                    var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
+                    console.log("End point point 3D: " + JSON.stringify(arcEndPos));
                 }
 
-                var midPointAtFacetedCurve = getMidPointAtFacetedCurve();
+                // get the third point: a point on or near the midpoint of the arc, at a segment vertex
+                var thirdPointID = nVertexIDArray[Math.ceil(edgeCount / 2)][0];
+                console.log("Third point vertexID: " + JSON.stringify(thirdPointID));
 
-                // // get the third point: a point on or near the midpoint of the arc, at a segment vertex
-                // var thirdPointID = nVertexIDArray[Math.ceil(edgeCount / 2)][0];
-                // console.log("Third point vertexID: " + JSON.stringify(thirdPointID));
-
-                // // get the point3D equivalent
-                // var thirdPointPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, thirdPointID);
-                // console.log("Third point 3D: " + JSON.stringify(thirdPointPos));
+                // get the point3D equivalent
+                var thirdPointPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, thirdPointID);
+                console.log("Third point 3D: " + JSON.stringify(thirdPointPos));
 
                 var radius = arcCircleAnalysis["radius"];
                 console.log("Radius of circle: " + JSON.stringify(radius));
+
+                var center = arcCircleAnalysis["center"];
+                console.log("Center of circle: " + JSON.stringify(center));
                 
                 var pi = 3.1415926535897932384626433832795;
                 var circumference = radius * 2 * pi;
@@ -421,6 +381,25 @@ deanstein.RebuildCurve = function(args)
                         p = p + 1;
                     }
                     //console.log("Edge length array: " + edgeLengthArray);
+
+                    // debug to ensure all three points are getting the same distance from the center
+                    /*function getDistanceFromCenter(point0, center)
+                    {
+                        var x0 = point0["x"];
+                        var x1 = center["x"];
+
+                        var y0 = point0["y"];
+                        var y1 = center["y"];
+
+                        var z0 = point0["z"];
+                        var z1 = center["z"];
+
+                        return getDistanceBetweenTwoPoints(x0,y0,z0, x1,y1,z1);
+                    }
+
+                    console.log("Distance from arcStartPos to center: " + getDistanceFromCenter(arcStartPos, center));
+                    console.log("Distance from arcEndPos to center: " + getDistanceFromCenter(arcEndPos, center));
+                    console.log("Distance from thirdPointPos to center: " + getDistanceFromCenter(thirdPointPos, center));*/
 
                     var facetedArcLength = 0;
 
@@ -465,7 +444,7 @@ deanstein.RebuildCurve = function(args)
                 }
 
                 // execute the rebuild
-                WSM.APICreateCircleOrArcFromPoints(nHistoryID, arcStartPos, arcEndPos, midPointAtFacetedCurve, accuracyORcount, bReadOnly, trans, nMinimumNumberOfFacets);
+                WSM.APICreateCircleOrArcFromPoints(nHistoryID, arcStartPos, arcEndPos, thirdPointPos, accuracyORcount, bReadOnly, trans, nMinimumNumberOfFacets, bCircle);
 
                 // find the geometry that was changed so it can be highlighted and checked
                 var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(nHistoryID, 7);

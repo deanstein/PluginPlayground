@@ -23,17 +23,17 @@ deanstein.RebuildCurve = function(args)
         return;
     }
 
-    var typeArray = new Array();
-    var nObjectIDArray = new Array();
-    var nVertexIDArray = new Array();
-    var point3DArray = new Array();
-    var bIsEdgeTypeArray = new Array();
-    var edgeLengthArray = new Array();
-    var siblingArray = new Array();
-    var bIsSameSiblingArray = new Array();
-    var arcCircleAnalysisArray = new Array();    
-    var bIsOnCircleArray = new Array();
-    var bIsOnSplineArray = new Array();
+    var typeArray = [];
+    var nObjectIDArray = [];
+    var nVertexIDArray = [];
+    var point3DArray = [];
+    var bIsEdgeTypeArray = [];
+    var edgeLengthArray = [];
+    var siblingArray = [];
+    var bIsSameSiblingArray = [];
+    var arcCircleAnalysisArray = [];
+    var bIsOnCircleArray = [];
+    var bIsOnSplineArray = [];
 
     function getSelectionInfo()
     {
@@ -194,6 +194,7 @@ deanstein.RebuildCurve = function(args)
             console.log("Can't continue: The selection set contains multiple edges. Try selecting only a single curve or line.");
         }
 
+        // check if all required tests pass
         if (bIsSelectionEdgeTypeOnly && bIsSelectionContiguous) 
         {
             var preCheckPassed = true;
@@ -260,8 +261,38 @@ deanstein.RebuildCurve = function(args)
                 var edgeCount = currentSelection.length;
                 console.log("Edges selected: " + edgeCount);
 
+                // flatten the array of Vertex IDs so they're not organized in sets for each edge
+                function flatten(nVertexIDArray) 
+                {
+                    return nVertexIDArray.reduce(function (flat, toFlatten) 
+                    {
+                        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+                    }, []);
+                }
+
+                var nVertexIDArrayFlattened = flatten(nVertexIDArray);
+                //console.log("Flattened nVertexID array: " + nVertexIDArrayFlattened);
+
+                var nVertexIDUniqueArray = [];
+                var count = 0;
+                
+                // in the flattened vertex array, determine which values are unique (representing the end points of the arc)
+                for (var i = 0; i < nVertexIDArrayFlattened.length; i++)
+                {
+                    count = 0;
+                    for (var j = 0; j < nVertexIDArrayFlattened.length; j++)
+                    {
+                        if (nVertexIDArrayFlattened[j] === nVertexIDArrayFlattened[i])
+                            count++;
+                    }
+                    if (count === 1)
+                        nVertexIDUniqueArray.push(nVertexIDArrayFlattened[i]);
+                }
+                //console.log("Array of unique vertex IDs: " + nVertexIDUniqueArray);
+
+
                 // get the ID of the first vertex of the first edge in the arraay
-                var arcStartPosID = nVertexIDArray[0][0];
+                var arcStartPosID = nVertexIDUniqueArray[0];
                 console.log("Start point vertexID: " + arcStartPosID);
 
                 // get the point3D equivalent
@@ -269,12 +300,12 @@ deanstein.RebuildCurve = function(args)
                 console.log("Start point point3D: " + JSON.stringify(arcStartPos));
 
                 // get the ID of the last vertex of the last edge in the array
-                var arcEndPosID = nVertexIDArray[edgeCount - 1][1];
+                var arcEndPosID = nVertexIDUniqueArray[1];
                 console.log("End point vertexID: " + arcEndPosID);
 
                 // get the point3D equivalent
                 var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
-                console.log("End point point3D: " + JSON.stringify(arcEndPos));
+                console.log("End point point 3D: " + JSON.stringify(arcEndPos));
 
                 function getMidPointAtFacetedCurve()
                 {
@@ -342,6 +373,14 @@ deanstein.RebuildCurve = function(args)
 
                 var midPointAtFacetedCurve = getMidPointAtFacetedCurve();
 
+                // // get the third point: a point on or near the midpoint of the arc, at a segment vertex
+                // var thirdPointID = nVertexIDArray[Math.ceil(edgeCount / 2)][0];
+                // console.log("Third point vertexID: " + JSON.stringify(thirdPointID));
+
+                // // get the point3D equivalent
+                // var thirdPointPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, thirdPointID);
+                // console.log("Third point 3D: " + JSON.stringify(thirdPointPos));
+
                 var radius = arcCircleAnalysis["radius"];
                 console.log("Radius of circle: " + JSON.stringify(radius));
                 
@@ -378,7 +417,7 @@ deanstein.RebuildCurve = function(args)
                         edgeLengthArray.push(distanceBetweenTwoPoints);
                         //console.log("Edge length array: " + edgeLengthArray);
 
-                        // since each point3D is in a set of 2 (for each vertex), increase the for variable again
+                        // since each point3D is in a set of 2 (for each end of each line), increase the for variable again
                         p = p + 1;
                     }
                     //console.log("Edge length array: " + edgeLengthArray);
@@ -454,7 +493,11 @@ deanstein.RebuildCurve = function(args)
                 return newFacetCount;
             }
 
+            FormIt.UndoManagement.BeginState();
+
             newFacetCount = rebuildArcCircle(facetCount);
+
+            FormIt.UndoManagement.EndState("Rebuild Arc/Circle");
 
             // if the new facet count doesn't match the specified count, re-do the operation with a modified facet count
             if (newFacetCount != facetCount)
@@ -478,12 +521,8 @@ deanstein.RebuildCurve = function(args)
         }
     }
 
-    FormIt.UndoManagement.BeginState();
-
     // execute the rebuild
     rebuildCurve(operationType);
-
-    FormIt.UndoManagement.EndState("Rebuild Curve");
 
 }
 
@@ -543,7 +582,6 @@ deanstein.Submit = function()
 {
     var args = 
     {
-    "edgeLength": parseFloat(document.a.edgeLength.value),
     "facetCount": parseFloat(document.a.facetCount.value)
     }
 

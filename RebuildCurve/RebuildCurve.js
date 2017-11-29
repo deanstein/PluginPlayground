@@ -252,7 +252,8 @@ deanstein.RebuildCurve = function(args)
             var facetCount = args.facetCount;
             function rebuildArcCircle(facetCount)
             {
-                console.log("\nBegin rebuild of arc or circle...\n");
+                console.log("\nBegin rebuild of arc or circle...");
+                console.log("\nGetting information about the current arc or circle...\n")
 
                 // get the first index of the arc/circle analysis, which should be sufficient because we've already proven the arrays are identical by this point
                 var arcCircleAnalysis = arcCircleAnalysisArray[0];
@@ -294,8 +295,9 @@ deanstein.RebuildCurve = function(args)
                 if (nVertexIDUniqueArray.length === 0)
                 {
                     var bCircle = true;
+                    console.log("Determined this curve is a full circle.\n");
                     // get the ID of the second vertex of the first edge in the array
-                    var arcStartPosID = nVertexIDArrayFlattened[2];
+                    var arcStartPosID = nVertexIDArrayFlattened[0];
                     console.log("Start point vertexID: " + arcStartPosID);
 
                     // get the point3D equivalent
@@ -303,7 +305,7 @@ deanstein.RebuildCurve = function(args)
                     console.log("Start point point3D: " + JSON.stringify(arcStartPos))
 
                     // get the ID of the last vertex of the last edge in the array
-                    var arcEndPosID = nVertexIDArrayFlattened[nVertexIDArrayFlattened.length - 1];
+                    var arcEndPosID = nVertexIDArrayFlattened[nVertexIDArrayFlattened.length - 2];
                     console.log("End point vertexID: " + arcEndPosID);
 
                     // get the point3D equivalent
@@ -313,6 +315,7 @@ deanstein.RebuildCurve = function(args)
                 else
                 {
                     var bCircle = false;
+                    console.log("Determined this curve is an arc, not a circle.\n");
                     // get the ID of the first vertex of the first edge in the array
                     var arcStartPosID = nVertexIDUniqueArray[0];
                     console.log("Start point vertexID: " + arcStartPosID);
@@ -339,18 +342,23 @@ deanstein.RebuildCurve = function(args)
                 console.log("Third point 3D: " + JSON.stringify(thirdPointPos));
 
                 var radius = arcCircleAnalysis["radius"];
-                console.log("Radius of circle: " + JSON.stringify(radius));
+                //console.log("Radius of circle: " + JSON.stringify(radius));
 
                 var center = arcCircleAnalysis["center"];
-                console.log("Center of circle: " + JSON.stringify(center));
+                console.log("Center of circle or arc: " + JSON.stringify(center));
+
+                var xAxis = arcCircleAnalysis["xaxis"];
+                console.log("X axis of circle or arc: " + JSON.stringify(xAxis));
+
+                var normal = arcCircleAnalysis["normal"];
+                console.log("Normal of circle or arc: " + JSON.stringify(normal));
                 
                 var pi = 3.1415926535897932384626433832795;
                 var circumference = radius * 2 * pi;
-                console.log("Circumference of circle: " + JSON.stringify(circumference));
+                console.log("Circumference of circle or arc: " + JSON.stringify(circumference));
 
                 function getFacetedArcLength(point3DArray)
                 {
-                    console.log("\nGetting arc or circle length...\n")
                     // for each edge, measure the distance between the two points
                     for(var p = 0; p < nVertexIDArray.length * 2; p++)
                     {
@@ -383,7 +391,7 @@ deanstein.RebuildCurve = function(args)
                     //console.log("Edge length array: " + edgeLengthArray);
 
                     // debug to ensure all three points are getting the same distance from the center
-                    /*function getDistanceFromCenter(point0, center)
+                    function getDistanceFromCenter(point0, center)
                     {
                         var x0 = point0["x"];
                         var x1 = center["x"];
@@ -397,9 +405,11 @@ deanstein.RebuildCurve = function(args)
                         return getDistanceBetweenTwoPoints(x0,y0,z0, x1,y1,z1);
                     }
 
-                    console.log("Distance from arcStartPos to center: " + getDistanceFromCenter(arcStartPos, center));
-                    console.log("Distance from arcEndPos to center: " + getDistanceFromCenter(arcEndPos, center));
-                    console.log("Distance from thirdPointPos to center: " + getDistanceFromCenter(thirdPointPos, center));*/
+                    console.log("\nVerifying the calculated radius to compare against the radius reported from the attribute...\n");
+                    console.log("Radius of circle or arc (from attribute): " + JSON.stringify(radius));
+                    console.log("Distance from arcStartPos to center (calculated): " + getDistanceFromCenter(arcStartPos, center));
+                    console.log("Distance from arcEndPos to center (calculated): " + getDistanceFromCenter(arcEndPos, center));
+                    console.log("Distance from thirdPointPos to center (calculated): " + getDistanceFromCenter(thirdPointPos, center) + "\n");
 
                     var facetedArcLength = 0;
 
@@ -422,11 +432,17 @@ deanstein.RebuildCurve = function(args)
 
                 // Number of facets in each 90 degree arc segment; if circle, 4x this amount
                 //var accuracyORcount = (quarterCircleMultiplier / 0.25) * (args.facetCount);
-                var accuracyORcount = Math.floor(args.facetCount / quarterCircleMultiplier);
-                console.log("Effective accuracyORcount: " + accuracyORcount);
+                var accuracyORcount = (Math.floor(args.facetCount / quarterCircleMultiplier));
+                console.log("accuracyORcount: " + accuracyORcount);
+                console.log("Effective accuracyORcount (x multiplier): " + (Math.ceil(quarterCircleMultiplier * accuracyORcount)));
+                console.log("Requested facet count: " + args.facetCount);
+                if (Math.ceil(accuracyORcount * quarterCircleMultiplier) < args.facetCount)
+                {
+                    console.log("The requested facet count was higher than the resulting accuracyORcount value, so accuracyORcount was ignored.")
+                }
                 var bReadOnly = false;
                 var trans;
-                var nMinimumNumberOfFacets = 0;
+                var nMinimumNumberOfFacets = args.facetCount;
 
                 // if delete is checked, delete the original edges
                 var bDelete = true;
@@ -482,7 +498,7 @@ deanstein.RebuildCurve = function(args)
             if (newFacetCount != facetCount)
             {
                 var facetDelta = facetCount - newFacetCount;
-                console.log("\nThe resulting facet count deviated from the specified amount. In the future, this will be handled better.");
+                console.log("\nWARNING: The resulting facet count deviated from the specified amount. See the messages above for more information.");
                 //facetCount = facetCount + facetDelta;
 
                 //FormIt.UndoManagement.Undo(nHistoryID);              

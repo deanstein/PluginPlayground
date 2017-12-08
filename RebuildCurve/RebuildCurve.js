@@ -466,24 +466,16 @@ deanstein.RebuildCurve = function(args)
                 var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(nHistoryID, 7);
                 //console.log("Changed data : " + JSON.stringify(changedData));
 
-                var newEdgeIDs = changedData["created"];
+                var newEdgeIDArray = changedData["created"];
 
-                // // add the new edges to the selection
-                // var newObjectIDArray = {};
- 
-                // for (var r = 0; r < newEdgeIDs.length; r++)
-                // {
-                //     newObjectIDArray.History = nHistoryID;
-                //     newObjectIDArray.Object = newEdgeIDs[r];
-                //     newObjectIDArray.objectName = "ObjectHistoryID";
-                //     console.log(JSON.stringify(newObjectIDArray));
-                //     FormIt.Selection.AddSelections(newEdgeIDs[r], newObjectIDArray);
-                //     console.log("newEdgeIDs at this index: " + newEdgeIDs[r]);
-                // }
-
-                var newFacetCount = newEdgeIDs.length;
-                //console.log("New edge IDs: " + newEdgeIDs);
+                var newFacetCount = newEdgeIDArray.length;
+                //console.log("New edge IDs: " + newEdgeIDArray);
                 console.log("\nCreated a new curve with " + newFacetCount + " faceted edges.");
+
+                // add the new edges to the selection
+                FormIt.Selection.AddSelections(newEdgeIDArray);
+                console.log("\nAdded the new curve to the selection.");
+
 
                 return newFacetCount;
             }

@@ -1,11 +1,8 @@
-// NOTE!! FormIt runs in one process and the HTML panel runs in another process.
-// This is why window.NewFormItInterface.CallMethod is needed to communicate
-// between the 2 processes.
+if (typeof deanstein == 'undefined')
+{
+    deanstein = {};
+}
 
-// To run:
-//FormIt.LoadPlugin("https://deanstein.github.io/PluginPlayground/MoveAllSceneCameras");
-
-deanstein = {};
 deanstein.MoveCameras = function(args)
 {
 

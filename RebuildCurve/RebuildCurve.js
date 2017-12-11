@@ -1,4 +1,7 @@
-deanstein = {};
+if (typeof deanstein == 'undefined')
+{
+    deanstein = {};
+}
 
 deanstein.RebuildCurve = function(args)
 {

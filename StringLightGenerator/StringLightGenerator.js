@@ -1,8 +1,10 @@
-deanstein = {};
+if (typeof deanstein == 'undefined')
+{
+    deanstein = {};
+}
 
 deanstein.GenerateStringLights = function(args)
 {
-
     console.clear();
 
     // get current history
@@ -32,7 +34,9 @@ deanstein.GenerateStringLights = function(args)
     var arcCircleAnalysisArray = new Array();    
     var bIsOnCircleArray = new Array();
     var bIsOnSplineArray = new Array();
+    var siblingArray = new Array();
 
+    // generic function to gather data about the selection and store it in arrays
     function getSelectionInfo()
     {
 
@@ -100,9 +104,10 @@ deanstein.GenerateStringLights = function(args)
         }
     }
 
+    // execute the get selection routine
     getSelectionInfo();
 
-    // define generic function to test each item in the array, compare for equality, and return a new array containing boolean values
+    // generic function to test each item in the array, compare for equality, and return a new array containing boolean values
     function testForIdentical(array, bArray, message) 
     {
         for (var k = 0; k < array.length - 1; k++)
@@ -119,7 +124,7 @@ deanstein.GenerateStringLights = function(args)
         //console.log(message + bArray);
     }
 
-    // define generic function that returns true only if all booleans evaluated are true
+    // generic function that returns true only if all booleans evaluated are true
     function booleanReduce(array)
     {
         function isTrue(bool) 
@@ -195,9 +200,10 @@ deanstein.GenerateStringLights = function(args)
         console.log(preCheckPassed);
     }
 
+    // precheck must pass to continue
     var preCheckPassed = preCheck();
 
-    // returns the type of operation to proceed with
+    // define how to determine the type of operation to proceed with
     function operationType(preCheckPassed) 
     {
         // TEST if the entire selection has the circle attribute
@@ -225,34 +231,74 @@ deanstein.GenerateStringLights = function(args)
         return operationType;
     }
 
+    // if we prechecked, then define the operation type
     if (preCheckPassed === true)
     {
         var operationType = operationType();
     }
 
-    // first step: if the selection is a line, we need to make an arc from scratch
+    // if the operation type is a line, we first need to make an arc from scratch
     if (operationType === "line") 
     {
         function createCatenaryArcFromLine() 
         {
             console.log("\nCreating a catenary arc from line");
             var arcStartPos = point3DArray[0];
-            console.log("Arc start point: " + arcStartPos);
+            console.log("Arc start point: " + JSON.stringify(arcStartPos));
 
             var arcEndPos = point3DArray[1];
-            console.log("Arc end point: " + arcEndPos);
+            console.log("Arc end point: " + JSON.stringify(arcEndPos));
 
+            var x0 = arcStartPos["x"];
+            var y0 = arcStartPos["y"];
+            var z0 = arcStartPos["z"];
+
+            var x1 = arcEndPos["x"];
+            var y1 = arcEndPos["y"];
+            var z1 = arcEndPos["z"];
+
+            // define how to get the midpoint between two points defined by an array [x,y,z]
+            function getMidPointBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
+            {
+                var arcBulge = args.arcBulge;
+
+                // assume gravity is down, and move the two endpoints down by that amount for the purposes of getting a lower midpoint representing the max bulge
+                var z0 = z0 - arcBulge;
+                var z1 = z1 - arcBulge;
+
+                var x = (x0 + x1) / 2;
+                var y = (y0 + y1) / 2;
+                var z = (z0 + z1) / 2;
+
+                var midPoint = new Array(x, y, z);
+                // returns [x,y,z]
+                console.log("Midpoint: " + midPoint);
+                return midPoint;
+            }
+
+            // get the bulge point
+            var midPoint = getMidPointBetweenTwoPoints(x0,y0,z0,x1,y1,z1);
+
+            // create a point 3D at the bulge point
+            var thirdPoint = WSM.Geom.Point3d(midPoint[0], midPoint[1], midPoint[2]);
+            console.log("Third point: " + thirdPoint);
+
+            // create a new arc
+            var catenaryArcFromLine = WSM.APICreateCircleOrArcFromPoints(nHistoryID, arcStartPos, arcEndPos, thirdPoint);
+            console.log("Created a new arc based on the input line.");
+            return catenaryArcFromLine;
         }
-        createCatenaryArcFromLine();
+
+        // define the target curve as this new curve
+        var targetCurve = createCatenaryArcFromLine();
     }
 
-    function generateStringLightsOnLine()
+    // if the operation is an arc or circle, optionally rebuild it, sweep the curve into a cable, and add lights
+    if (operationType === "arcCircle")
     {
-        // define whether the user will input a Line or an Arc
-        var bIsInputLine = true;
-        var bIsInputArc = false;
+        console.log("Arc or circle detected.");
 
-        // rebuild the arc for optionally smooth caternary curve
+        // define how to rebuild the given arc/circle
         function rebuildArcCircle(facetCount)
         {
             console.log("\nBegin rebuild of arc or circle...");
@@ -478,30 +524,50 @@ deanstein.GenerateStringLights = function(args)
             return newFacetCount;
         }
 
-        // rebuild the catenary curve?
-        var bRebuildArc = false;
-
-        if (bRebuildArc)
+        // rebuild the arc, if enabled
+        console.log("Rebuild arc/circle? " + bRebuildArc);
+        if (bRebuildArc) 
         {
-            FormIt.UndoManagement.BeginState();
-            newFacetCount = rebuildArcCircle(facetCount);
-            var catenaryArcEdgeIDArray = newEdgeIDArray;
-    
-            FormIt.UndoManagement.EndState("Rebuild Arc/Circle");
+            var targetCurve = rebuildArcCircle();
         }
 
-        else 
-        {
-            var catenaryArcEdgeIDArray = nObjectIDArray;
+            // take the selected curve and array string lights along it
+        function generateStringLightsAlongArcCircle()
+        {      
 
-            function sweepCatenaryArc()
+            // rebuild the catenary curve?
+            var bRebuildArc = false;
+
+            if (bRebuildArc)
             {
-                var aProfile = [];
-                var aPath = catenaryArcEdgeIDArray;
-                var bRemoveUnusedProfileAndPath = false;
-                WSM.APISweep(nHistoryID, aProfile, aPath, bRemoveUnusedProfileAndPath);   
+                FormIt.UndoManagement.BeginState();
+                newFacetCount = rebuildArcCircle(facetCount);
+                var catenaryArcEdgeIDArray = newEdgeIDArray;
+        
+                FormIt.UndoManagement.EndState("Rebuild Arc/Circle");
+            }
+
+            else 
+            {
+                var catenaryArcEdgeIDArray = nObjectIDArray;
+
+                function sweepCatenaryArc()
+                {
+                    var aProfile = [];
+                    var aPath = catenaryArcEdgeIDArray;
+                    var bRemoveUnusedProfileAndPath = false;
+                    WSM.APISweep(nHistoryID, aProfile, aPath, bRemoveUnusedProfileAndPath);   
+                }
             }
         }
+
+        
+    }
+
+    // if the operation is a spline, we throw an error because this isn't supported yet
+    if (operationType === "spline")
+    {
+        console.log("Splines aren't supported yet, sorry.");
     }
 
     if (preCheckPassed && (operationType == "line"))
@@ -518,8 +584,9 @@ deanstein.Submit = function()
 {
     var args = 
     {
-    "edgeLength": parseFloat(document.a.edgeLength.value),
-    "facetCount": parseFloat(document.a.facetCount.value)
+    "facetCount": parseFloat(document.a.facetCount.value),
+    "arcBulge": parseFloat(document.a.arcBulge.value),
+    "lightSpacing": parseFloat(document.a.lightSpacing.value)
     }
 
     console.log("deanstein.GenerateStringLights");

@@ -1,4 +1,8 @@
-deanstein = {};
+if (typeof deanstein == 'undefined')
+{
+    deanstein = {};
+}
+
 deanstein.FilletCorner = function(args)
 {
     //args = JSON.parse(args);

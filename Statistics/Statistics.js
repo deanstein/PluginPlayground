@@ -1,4 +1,8 @@
-deanstein = {};
+if (typeof deanstein == 'undefined')
+{
+    deanstein = {};
+}
+
 deanstein.Statistics = function(args)
 {
     //args = JSON.parse(args);

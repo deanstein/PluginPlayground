@@ -197,19 +197,319 @@ deanstein.GenerateStringLights = function(args)
 
     var preCheckPassed = preCheck();
 
+    // returns the type of operation to proceed with
+    function operationType(preCheckPassed) 
+    {
+        // TEST if the entire selection has the circle attribute
+        var bIsArcCircleType = booleanReduce(bIsOnCircleArray);
+
+        // TEST if the entire selection has the spline attribute
+        var bIsSplineType = booleanReduce(bIsOnSplineArray);
+
+        if (bIsArcCircleType === true)
+        {
+            var operationType = "arcCircle";
+        }
+
+        else if (bIsSplineType === true)
+        {
+            var operationType = "spline";
+        }
+
+        else
+        {
+            var operationType = "line";
+        }
+
+        console.log("Operation type: " + operationType);
+        return operationType;
+    }
+
+    if (preCheckPassed === true)
+    {
+        var operationType = operationType();
+    }
+
+    // first step: if the selection is a line, we need to make an arc from scratch
+    if (operationType === "line") 
+    {
+        function createCatenaryArcFromLine() 
+        {
+            console.log("\nCreating a catenary arc from line");
+            var arcStartPos = point3DArray[0];
+            console.log("Arc start point: " + arcStartPos);
+
+            var arcEndPos = point3DArray[1];
+            console.log("Arc end point: " + arcEndPos);
+
+        }
+        createCatenaryArcFromLine();
+    }
+
     function generateStringLightsOnLine()
     {
+        // define whether the user will input a Line or an Arc
+        var bIsInputLine = true;
+        var bIsInputArc = false;
 
+        // rebuild the arc for optionally smooth caternary curve
+        function rebuildArcCircle(facetCount)
+        {
+            console.log("\nBegin rebuild of arc or circle...");
+            console.log("\nGetting information about the current arc or circle...\n")
+
+            // get the first index of the arc/circle analysis, which should be sufficient because we've already proven the arrays are identical by this point
+            var arcCircleAnalysis = arcCircleAnalysisArray[0];
+            //console.log("Arc/circle analysis to use as reference: " + JSON.stringify(arcCircleAnalysis));
+
+            var edgeCount = currentSelection.length;
+            console.log("Edges selected: " + edgeCount);
+
+            // flatten the array of Vertex IDs so they're not organized in sets for each edge
+            function flatten(nVertexIDArray) 
+            {
+                return nVertexIDArray.reduce(function (flat, toFlatten) 
+                {
+                    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+                }, []);
+            }
+
+            var nVertexIDArrayFlattened = flatten(nVertexIDArray);
+            //console.log("Flattened nVertexID array: " + nVertexIDArrayFlattened);
+
+            var nVertexIDUniqueArray = [];
+            var count = 0;
+            
+            // in the flattened vertex array, determine which values are unique (representing the end points of the arc)
+            for (var i = 0; i < nVertexIDArrayFlattened.length; i++)
+            {
+                count = 0;
+                for (var j = 0; j < nVertexIDArrayFlattened.length; j++)
+                {
+                    if (nVertexIDArrayFlattened[j] === nVertexIDArrayFlattened[i])
+                        count++;
+                }
+                if (count === 1)
+                    nVertexIDUniqueArray.push(nVertexIDArrayFlattened[i]);
+            }
+            //console.log("Array of unique vertex IDs: " + nVertexIDUniqueArray);
+
+            // if no unique values are found, this is a circle, so mark the circle boolean true and redefine the two end points so all three points are distinct
+            if (nVertexIDUniqueArray.length === 0)
+            {
+                var bCircle = true;
+                console.log("Determined this curve is a full circle.\n");
+                // get the ID of the second vertex of the first edge in the array
+                var arcStartPosID = nVertexIDArrayFlattened[0];
+                console.log("Start point vertexID: " + arcStartPosID);
+
+                // get the point3D equivalent
+                var arcStartPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcStartPosID);
+                console.log("Start point point3D: " + JSON.stringify(arcStartPos))
+
+                // get the ID of the last vertex of the last edge in the array
+                var arcEndPosID = nVertexIDArrayFlattened[nVertexIDArrayFlattened.length - 2];
+                console.log("End point vertexID: " + arcEndPosID);
+
+                // get the point3D equivalent
+                var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
+                console.log("End point point 3D: " + JSON.stringify(arcEndPos));
+            }
+            else
+            {
+                var bCircle = false;
+                console.log("Determined this curve is an arc, not a circle.\n");
+                // get the ID of the first vertex of the first edge in the array
+                var arcStartPosID = nVertexIDUniqueArray[0];
+                console.log("Start point vertexID: " + arcStartPosID);
+
+                // get the point3D equivalent
+                var arcStartPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcStartPosID);
+                console.log("Start point point3D: " + JSON.stringify(arcStartPos));
+
+                // get the ID of the last vertex of the last edge in the array
+                var arcEndPosID = nVertexIDUniqueArray[1];
+                console.log("End point vertexID: " + arcEndPosID);
+
+                // get the point3D equivalent
+                var arcEndPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, arcEndPosID);
+                console.log("End point point 3D: " + JSON.stringify(arcEndPos));
+            }
+
+            // get the third point: a point on or near the midpoint of the arc, at a segment vertex
+            var thirdPointID = nVertexIDArray[Math.ceil(edgeCount / 2)][0];
+            console.log("Third point vertexID: " + JSON.stringify(thirdPointID));
+
+            // get the point3D equivalent
+            var thirdPointPos = WSM.APIGetVertexPoint3dReadOnly(nHistoryID, thirdPointID);
+            console.log("Third point 3D: " + JSON.stringify(thirdPointPos));
+
+            var radius = arcCircleAnalysis["radius"];
+            //console.log("Radius of circle: " + JSON.stringify(radius));
+
+            var center = arcCircleAnalysis["center"];
+            console.log("Center of circle or arc: " + JSON.stringify(center));
+
+            var xAxis = arcCircleAnalysis["xaxis"];
+            console.log("X axis of circle or arc: " + JSON.stringify(xAxis));
+
+            var normal = arcCircleAnalysis["normal"];
+            console.log("Normal of circle or arc: " + JSON.stringify(normal));
+            
+            var pi = 3.1415926535897932384626433832795;
+            var circumference = radius * 2 * pi;
+            console.log("Circumference of circle or arc: " + JSON.stringify(circumference));
+
+            function getFacetedArcLength(point3DArray)
+            {
+                // for each edge, measure the distance between the two points
+                for(var p = 0; p < nVertexIDArray.length * 2; p++)
+                {
+                    var x0 = point3DArray[p]["x"];
+                    var x1 = point3DArray[p + 1]["x"];
+                    //console.log("x0 = " + x0 + " and x1 = " + x1);
+
+                    var y0 = point3DArray[p]["y"];
+                    var y1 = point3DArray[p + 1]["y"];
+                    //console.log("y0 = " + y0 + " and y1 = " + y1);
+
+                    var z0 = point3DArray[p]["z"];
+                    var z1 = point3DArray[p + 1]["z"];
+                    //console.log("z0 = " + z0 + " and z1 = " + z1);
+
+                    //generic function to get the distance between two points [x,y,z]
+                    function getDistanceBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
+                    {
+                        var distance = Math.sqrt((Math.pow((x1-x0),2)) + (Math.pow((y1-y0),2)) + (Math.pow((z1-z0),2)));
+                        //console.log("Distance: " + distance);
+                        return distance;
+                    }
+                    var distanceBetweenTwoPoints = getDistanceBetweenTwoPoints(x0,y0,z0,x1,y1,z1);
+                    edgeLengthArray.push(distanceBetweenTwoPoints);
+                    //console.log("Edge length array: " + edgeLengthArray);
+
+                    // since each point3D is in a set of 2 (for each end of each line), increase the for variable again
+                    p = p + 1;
+                }
+                //console.log("Edge length array: " + edgeLengthArray);
+
+                // debug to ensure all three points are getting the same distance from the center
+                function getDistanceToCircleCenter(point0, center)
+                {
+                    var x0 = point0["x"];
+                    var x1 = center["x"];
+
+                    var y0 = point0["y"];
+                    var y1 = center["y"];
+
+                    var z0 = point0["z"];
+                    var z1 = center["z"];
+
+                    return getDistanceBetweenTwoPoints(x0,y0,z0, x1,y1,z1);
+                }
+
+                console.log("\nVerifying the calculated radius to compare against the radius reported from the attribute...\n");
+                console.log("Radius of circle or arc (from attribute): " + JSON.stringify(radius));
+                console.log("Distance from arcStartPos to center (calculated): " + getDistanceToCircleCenter(arcStartPos, center));
+                console.log("Distance from arcEndPos to center (calculated): " + getDistanceToCircleCenter(arcEndPos, center));
+                console.log("Distance from thirdPointPos to center (calculated): " + getDistanceToCircleCenter(thirdPointPos, center) + "\n");
+
+                var facetedArcLength = 0;
+
+                for (q = 0; q < edgeLengthArray.length; q++)
+                {
+                    var facetedArcLength = facetedArcLength + edgeLengthArray[q];
+                }
+                console.log("Number of edges used to calculate length: " + edgeLengthArray.length);
+                console.log("Existing arc length: " + facetedArcLength);
+                return facetedArcLength;
+            }
+
+            var facetedArcLength = getFacetedArcLength(point3DArray);
+
+            var quarterCircleLength = circumference / 4;
+
+            // determine how many quarter-circles this faceted arc represents
+            var quarterCircleMultiplier = facetedArcLength / quarterCircleLength;
+            console.log("Quarter circle multiplier: " + quarterCircleMultiplier);
+
+            // Number of facets in each 90 degree arc segment; if circle, 4x this amount
+            //var accuracyORcount = (quarterCircleMultiplier / 0.25) * (args.facetCount);
+            var accuracyORcount = (Math.floor(args.facetCount / quarterCircleMultiplier));
+            console.log("accuracyORcount: " + accuracyORcount);
+            console.log("Effective accuracyORcount (x multiplier): " + (Math.ceil(quarterCircleMultiplier * accuracyORcount)));
+            console.log("Requested facet count: " + args.facetCount);
+            if (Math.ceil(accuracyORcount * quarterCircleMultiplier) < args.facetCount)
+            {
+                console.log("The requested facet count was higher than the resulting accuracyORcount value, so accuracyORcount was ignored.")
+            }
+            var bReadOnly = false;
+            var trans;
+            var nMinimumNumberOfFacets = args.facetCount;
+
+            // if delete is checked, delete the original edges
+            var bDelete = true;
+            for (var n = 0; n < nObjectIDArray.length; n++)
+            {
+                if (bDelete === true) 
+                {
+                    WSM.APIDeleteObject(nHistoryID, nObjectIDArray[n]);
+                }
+            }
+
+            if (bDelete === true)
+            {
+                console.log("\nDeleted the old curve.");
+            }
+
+            // execute the rebuild
+            WSM.APICreateCircleOrArcFromPoints(nHistoryID, arcStartPos, arcEndPos, thirdPointPos, accuracyORcount, bReadOnly, trans, nMinimumNumberOfFacets, bCircle);
+
+            // find the geometry that was changed so it can be highlighted and checked
+            var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(nHistoryID, 7);
+            //console.log("Changed data : " + JSON.stringify(changedData));
+
+            var newEdgeIDArray = changedData["created"];
+
+            var newFacetCount = newEdgeIDArray.length;
+            //console.log("New edge IDs: " + newEdgeIDs);
+            console.log("\nCreated a new curve with " + newFacetCount + " faceted edges.");
+
+            return newFacetCount;
+        }
+
+        // rebuild the catenary curve?
+        var bRebuildArc = false;
+
+        if (bRebuildArc)
+        {
+            FormIt.UndoManagement.BeginState();
+            newFacetCount = rebuildArcCircle(facetCount);
+            var catenaryArcEdgeIDArray = newEdgeIDArray;
+    
+            FormIt.UndoManagement.EndState("Rebuild Arc/Circle");
+        }
+
+        else 
+        {
+            var catenaryArcEdgeIDArray = nObjectIDArray;
+
+            function sweepCatenaryArc()
+            {
+                var aProfile = [];
+                var aPath = catenaryArcEdgeIDArray;
+                var bRemoveUnusedProfileAndPath = false;
+                WSM.APISweep(nHistoryID, aProfile, aPath, bRemoveUnusedProfileAndPath);   
+            }
+        }
     }
 
-    if (preCheckPassed)
+    if (preCheckPassed && (operationType == "line"))
     {
-        generateStringLightsOnLine();
+        createCatenaryArcFromLine();
     }
-
 
 }
-
 
 
 // Submit runs from the HTML page.  This script gets loaded up in both FormIt's
@@ -222,25 +522,10 @@ deanstein.Submit = function()
     "facetCount": parseFloat(document.a.facetCount.value)
     }
 
-    console.log("deanstein.RebuildCurve");
+    console.log("deanstein.GenerateStringLights");
     console.log("args");
     // NOTE: window.FormItInterface.CallMethod will call the function
     // defined above with the given args.  This is needed to communicate
     // between the web JS enging process and the FormIt process.
-    window.FormItInterface.CallMethod("deanstein.RebuildCurve", args);
-}
-
-deanstein.SubmitExplode = function(argsExplode)
-{
-
-    var argsExplode =
-    {
-
-    }
-    console.log("deanstein.RebuildCurve");
-    console.log("args");
-    // NOTE: window.FormItInterface.CallMethod will call the function
-    // defined above with the given args.  This is needed to communicate
-    // between the web JS enging process and the FormIt process.
-    window.FormItInterface.CallMethod("deanstein.ExplodeCurve", argsExplode);
+    window.FormItInterface.CallMethod("deanstein.GenerateStringLights", args);
 }

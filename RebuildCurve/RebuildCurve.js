@@ -391,7 +391,7 @@ deanstein.RebuildCurve = function(args)
                     //console.log("Edge length array: " + edgeLengthArray);
 
                     // debug to ensure all three points are getting the same distance from the center
-                    function getDistanceFromCenter(point0, center)
+                    function getDistanceToCircleCenter(point0, center)
                     {
                         var x0 = point0["x"];
                         var x1 = center["x"];
@@ -407,9 +407,9 @@ deanstein.RebuildCurve = function(args)
 
                     console.log("\nVerifying the calculated radius to compare against the radius reported from the attribute...\n");
                     console.log("Radius of circle or arc (from attribute): " + JSON.stringify(radius));
-                    console.log("Distance from arcStartPos to center (calculated): " + getDistanceFromCenter(arcStartPos, center));
-                    console.log("Distance from arcEndPos to center (calculated): " + getDistanceFromCenter(arcEndPos, center));
-                    console.log("Distance from thirdPointPos to center (calculated): " + getDistanceFromCenter(thirdPointPos, center) + "\n");
+                    console.log("Distance from arcStartPos to center (calculated): " + getDistanceToCircleCenter(arcStartPos, center));
+                    console.log("Distance from arcEndPos to center (calculated): " + getDistanceToCircleCenter(arcEndPos, center));
+                    console.log("Distance from thirdPointPos to center (calculated): " + getDistanceToCircleCenter(thirdPointPos, center) + "\n");
 
                     var facetedArcLength = 0;
 

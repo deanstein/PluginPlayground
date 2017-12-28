@@ -1,3 +1,19 @@
+
+//generic function to get the distance between two points [x,y,z]
+function getDistanceBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
+{
+    var distance = Math.sqrt((Math.pow((x1-x0),2)) + (Math.pow((y1-y0),2)) + (Math.pow((z1-z0),2)));
+    //console.log("Distance: " + distance);
+    return distance;
+}
+
+// generic function to get the vector between two points [x,y,z]
+function getVectorBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
+{
+    var vector = new Array(x1-x0, y1-y0, z1-z0);
+    return vector;
+}
+
 // get the midpoint between two points defined by an array [x,y,z]
 function getMidPointBetweenTwoPoints(x0,y0,z0, x1,y1,z1)
 {

@@ -17,9 +17,19 @@
 <p></p>
 
 <form name=a> 
-    <input type=number name=arcBulge value=2> Max Bulge of New Catenary Arc<br>
-    <input type=number name=facetCount value=16> Number of Facets in Catenary Arc<br>
-    <input type=number name=lightSpacing value=6 disabled> Distance Between Lights Along Arc<br>
+    <p>Typical light fixture properties:</p>
+    <input type=number name=lightCount value=6> Number of Lights<br>
+    <input type=number name=verticalCableOrHousingLength value=0.1667> Cable Length or Housing Height<br>
+    <input type=number name=verticalCableOrHousingRadius value=0.083> Cable or Housing Radius<br>
+    <input type=number name=bulbRadius value=0.2> Bulb Radius<br>
+    <input type=number name=bulbCount value=1> Bulbs Per Light<br>
+    <p></p>
+    <p>Catenary curve properties:</p>
+    <input type=number name=facetCount value=16> Number of Facets in Arc<br>
+    <input type=number name=arcCableRadius value=0.01> Arc Cable Radius<br>
+    <p></p>
+    <p>If creating a new arc:</p>
+    <input type=number name=arcBulge value=2> Max Cable Hanging Depth<br>
     
     <input type=button value="Generate String Lights" onClick="deanstein.Submit();">
 </form>

@@ -17,19 +17,19 @@
 <p></p>
 
 <form name=a> 
-    <p>Typical light fixture properties:</p>
-    <input type=number name=lightCount value=6> Number of Lights<br>
-    <input type=number name=verticalCableOrHousingLength value=0.1667> Cable Length or Housing Height<br>
-    <input type=number name=verticalCableOrHousingRadius value=0.083> Cable or Housing Radius<br>
+    <p>Typical fixture properties:</p>
+    <input type=number name=lightCount value=6> Number of Fixtures<br>
+    <input type=number name=verticalCableOrHousingLength value=0.1667> Vertical Cable or Housing Height<br>
+    <input type=number name=verticalCableOrHousingRadius value=0.083> Vertical Cable or Housing Radius<br>
     <input type=number name=bulbRadius value=0.2> Bulb Radius<br>
-    <input type=number name=bulbCount value=1> Bulbs Per Light<br>
+    <input type=number name=bulbCount value=1> Bulbs Per Fixture<br>
     <p></p>
     <p>Catenary curve properties:</p>
-    <input type=number name=facetCount value=16> Number of Facets in Arc<br>
-    <input type=number name=arcCableRadius value=0.01> Arc Cable Radius<br>
+    <input type=number name=facetCount value=16> Number of Facets in Curve<br>
+    <input type=number name=catenaryCableRadius value=0.01> Catenary Cable Radius<br>
     <p></p>
     <p>If creating a new arc:</p>
-    <input type=number name=arcBulge value=2> Max Cable Hanging Depth<br>
+    <input type=number name=arcBulge value=2> Cable Dip<br>
     
     <input type=button value="Generate String Lights" onClick="deanstein.Submit();">
 </form>

@@ -632,6 +632,12 @@ deanstein.GenerateStringLights.drawSingleLightFixture = function(placementPoint,
     var cablePath = WSM.APIConnectPoint3ds(typicalLightFixtureHistoryID, placementPoint, verticalCableBottomPointPos);
     console.log("Drew a single line representing the cable length or bulb housing.");
 
+    // find theedgeface that was just created so it can be highlighted and checked
+    var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(typicalLightFixtureHistoryID, 7);
+    //console.log("Changed data: " + JSON.stringify(changedData));
+    var cablePathID = changedData["created"][0];
+    console.log("New path ID: " + JSON.stringify(cablePathID));
+
     var bulbCount = args.bulbCount;
     var verticalCableOrHousingRadius = args.verticalCableOrHousingRadius;
 
@@ -693,11 +699,20 @@ deanstein.GenerateStringLights.drawSingleLightFixture = function(placementPoint,
 
     // sweep the initial line into a cable or housing
     console.log("Begin sweep of vertical cable...");
-    var aProfileID = WSM.APICreateCircleOrArc(typicalLightFixtureHistoryID, verticalCableOrHousingRadius, placementPoint);
-    var aProfile = [{"ids":[{"History":0,"Object":514,"objectName":"ObjectHistoryID"},{"History":12,"Object":0,"objectName":"ObjectHistoryID"},{"History":10,"Object":86,"objectName":"ObjectHistoryID"}],"objectName":"GroupInstancePath"}];
-    var aPath = cablePath;
+    var aProfilePoints = WSM.APICreateCircleOrArc(typicalLightFixtureHistoryID, verticalCableOrHousingRadius, placementPoint);
+
+    // find the face that was just created
+    var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(typicalLightFixtureHistoryID, 4);
+    //console.log("Changed data: " + JSON.stringify(changedData));
+    var newProfileFaceID = changedData["created"][0];
+    console.log("New profile face ID: " + JSON.stringify(newProfileFaceID));
+    console.log("Typical light fixture history ID: " + typicalLightFixtureHistoryID);
+
+    var aProfile = [{"ids":[{"History":typicalLightFixtureHistoryID,"Object":newProfileFaceID,"objectName":"ObjectHistoryID"}], "objectName": "GroupInstancePath"}];
+    var aPath = [{"ids":[{"History":typicalLightFixtureHistoryID,"Object":cablePathID,"objectName":"ObjectHistoryID"}], "objectName": "GroupInstancePath"}];
     var bRemoveUnusedProfileAndPath = true;
 
+    // execute the sweep
     WSM.APISweep(typicalLightFixtureHistoryID, aProfile, aPath, bRemoveUnusedProfileAndPath);
 
     var typicalFixtureInstanceIDArray = WSM.APIGetObjectsByTypeReadOnly(nHistoryID, typicalLightFixtureGroupID, WSM.nInstanceType);
@@ -740,9 +755,11 @@ deanstein.GenerateStringLights.arrayStringLights = function(typicalFixtureInstan
     console.log("Arrayed instance ID " + typicalFixtureInstanceID + " " + placementPointArray.length + " times.");
 }
 
-// macro list of all the definitions that are invoked, and in which order
+// macro list of all commands related to generating the new string light assemblies
 deanstein.GenerateStringLights.execute = function(args)
 {
+            
+    FormIt.UndoManagement.BeginState()
     console.clear();
 
     // execute the get selection basics routine
@@ -801,10 +818,8 @@ deanstein.GenerateStringLights.execute = function(args)
     if (bRebuildArc) 
     {
         var facetCount = args.facetCount;
-        
-        FormIt.UndoManagement.BeginState()
+
         deanstein.GenerateStringLights.rebuildArcCircle(vertexIDArrayForRebuild, args);
-        FormIt.UndoManagement.EndState("Rebuild arc/circle");
     }
 
     // execute the get selection basics routine to capture the rebuilt curve
@@ -829,9 +844,80 @@ deanstein.GenerateStringLights.execute = function(args)
 
     // get all the group IDs from the array of fixtures
     var fixtureGroupIDArray = WSM.APIGetObjectsByTypeReadOnly(nHistoryID, typicalFixtureInstanceID, WSM.nGroupType, true);
+
+    var fixtureGroupID = fixtureGroupIDArray[0];
     
     // define the group ID that will contain all pieces of the new string light assembly
-    var stringLightContainerGroupID = WSM.APICreateGroup(nHistoryID, fixtureGroupIDArray);
+    var stringLightContainerGroupID = WSM.APICreateGroup(nHistoryID, fixtureGroupID);
+
+    // make a new history for the light fixture group
+    var stringLightContainerHistoryID = WSM.APIGetGroupReferencedHistoryReadOnly(nHistoryID, stringLightContainerGroupID);
+
+    // get the instance ID
+    var stringLightContainerInstanceID = WSM.APIGetObjectsByTypeReadOnly(stringLightContainerHistoryID, stringLightContainerGroupID, WSM.nInstanceType);
+
+    // sweep the catenary cable
+    console.log("Begin sweep of catenary cable...");
+    var catenaryCableRadius = args.catenaryCableRadius;
+
+    // define the xAxis
+    var xAxis = WSM.Geom.Vector3d(1,0,1);
+
+    // define the yAxis
+    var yAxis;
+    
+    // get the end point of the arc
+    var catenaryCableProfileCenterPos = deanstein.GenerateStringLights.arrays.arcCircle3PointPosArray[0];
+    //onsole.log("Center point for catenary profile: " + JSON.stringify(catenaryCableProfileCenterPos));
+
+    // create the profile at one of the end points of the catenary curve
+    var aProfilePoints = WSM.APICreateCircleOrArc(nHistoryID, catenaryCableRadius, catenaryCableProfileCenterPos);
+
+    // find the face that was just created
+    var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(nHistoryID, 4);
+    console.log("Changed data: " + JSON.stringify(changedData));
+    var newProfileFaceID = changedData["created"][0];
+    console.log("New profile face ID: " + JSON.stringify(newProfileFaceID));
+
+    var aProfile = [{"ids":[{"History":nHistoryID,"Object":newProfileFaceID,"objectName":"ObjectHistoryID"}], "objectName": "GroupInstancePath"}];
+
+    // construct the path based on the rebuilt curve
+    function constructPathArrays()
+    {
+        // for each edge in the catenary curve, generate a current path to access this edge for sweep
+        var pathArray = new Array();
+        for (var i = 0; i < deanstein.GenerateStringLights.arrays.nObjectIDArray.length; i++)
+        {
+            var currentPath = {"ids": [{"History": nHistoryID,"Object": deanstein.GenerateStringLights.arrays.nObjectIDArray[i],"objectName": "ObjectHistoryID"}],"objectName": "GroupInstancePath"};
+            pathArray.push(currentPath);
+        }
+        return pathArray;
+    }
+    var aPath = constructPathArrays();
+    //console.log("Path array: " + JSON.stringify(aPath));
+     /*= [{"ids":[{"History":stringLightContainerHistoryID,"Object":cablePathID,"objectName":"ObjectHistoryID"}], "objectName": "GroupInstancePath"}];*/
+    var bRemoveUnusedProfileAndPath = true;
+
+    // execute the catenary cable sweep
+    WSM.APISweep(nHistoryID, aProfile, aPath, bRemoveUnusedProfileAndPath);
+
+    // find the body that was just created
+    var changedData = WSM.APIGetCreatedChangedAndDeletedInActiveDeltaReadOnly(nHistoryID, 1);
+    console.log("Changed data: " + JSON.stringify(changedData));
+    var catenaryCableSweepBodyID = changedData["created"][0];
+    console.log("catenaryCableSweepBodyID: " + JSON.stringify(catenaryCableSweepBodyID));
+
+    // move the sweep into the main fixture container group
+    WSM.APICopyOrSketchAndTransformObjects(nHistoryID, stringLightContainerHistoryID, catenaryCableSweepBodyID, WSM.Geom.MakeRigidTransform(WSM.Geom.Point3d(0, 0, 0), WSM.Geom.Vector3d(1, 0, 0), WSM.Geom.Vector3d(0, 1, 0), WSM.Geom.Vector3d(0, 0, 1)), 1, false);
+
+    // delete the original sweep
+    WSM.APIDeleteObject(nHistoryID, catenaryCableSweepBodyID);
+
+    // delete the catenary arc
+    for (var i = 0; i < deanstein.GenerateStringLights.arrays.nObjectIDArray.length; i++)
+    {
+        WSM.APIDeleteObject(nHistoryID, deanstein.GenerateStringLights.arrays.nObjectIDArray[i])
+    }
 
     // if the operation is a spline, we throw an error because this isn't supported yet
     if (operationType === "spline")
@@ -839,6 +925,8 @@ deanstein.GenerateStringLights.execute = function(args)
         console.log("\nSpline detected.");
         console.log("Splines aren't supported yet, sorry.");
     }
+
+    FormIt.UndoManagement.EndState("Generate String Lights");
 
 }
 
@@ -854,7 +942,8 @@ deanstein.Submit = function()
     "verticalCableOrHousingLength":parseFloat(document.a.verticalCableOrHousingLength.value),
     "bulbRadius":parseFloat(document.a.bulbRadius.value),
     "bulbCount":parseFloat(document.a.bulbCount.value),
-    "verticalCableOrHousingRadius":parseFloat(document.a.verticalCableOrHousingRadius.value)
+    "verticalCableOrHousingRadius":parseFloat(document.a.verticalCableOrHousingRadius.value),
+    "catenaryCableRadius":parseFloat(document.a.catenaryCableRadius.value)
     }
 
     console.log("deanstein.GenerateStringLights.execute");

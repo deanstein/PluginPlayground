@@ -68,3 +68,16 @@ function booleanReduce(array)
         return false;
     }
 }
+
+// generic function that returns true only if ANY of the booleans evaluated in the array are true
+function booleanAnyTrue(array)
+{
+    for(var i = 0; i < array.length; i++)
+    {
+        var bool = array[i];
+        if (bool === true) 
+        {
+            return true;
+        }
+    }
+}

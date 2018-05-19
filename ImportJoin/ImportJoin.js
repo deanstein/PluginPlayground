@@ -1,5 +1,8 @@
 console.clear();
 
+// define the object to contain the pertinent info
+var fileInfoJSON = [{ID: "descriptionInput", label: "Additional Description"}, {ID: "mallLocationInput", label: "Location"}];
+
 // define the path all the files live in
 var filePath = "E:/_cloud/Box Sync/_FormIT/Customer Support/A+I/";
 

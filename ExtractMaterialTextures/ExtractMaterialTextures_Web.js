@@ -10,7 +10,7 @@ deanstein.PlaceholderImage = function()
     var img = document.createElement('img');
     img.id = 'image';
     window.document.body.appendChild(img);
-    img.src = '/img/placeholder.png';
+    img.src = 'img/placeholder.png';
 };
 
 // Submit runs from the HTML page.  This script gets loaded up in both FormIt's
@@ -34,7 +34,7 @@ deanstein.Submit = function()
             var img = document.getElementById('image');
             if (bitmapData === "undefined")
             {
-                img.src = '/img/notexture.png';
+                img.src = 'img/notexture.png';
             } else {
                 //debugger;
                 var evalBitmapData = eval(bitmapData);

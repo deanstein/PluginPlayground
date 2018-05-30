@@ -5,6 +5,7 @@
   "RebuildCurve",
   "FilletCorner",
   "MoveAllSceneCameras",
-  "StringLightGenerator"
+  "StringLightGenerator",
+  "ExtractMaterialTextures"
   ]
 }
